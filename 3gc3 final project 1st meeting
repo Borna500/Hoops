@@ -1,0 +1,30 @@
+3gc3 final project
+
+there is a ball, there is a basket you must toss the ball in the basket
+
+once the ball is launched, switch from first person to a profile view to show the ball moving.
+
+the texture will be a crumpled ball
+
+gravity, collision detection
+
+user hovers over a point and holds the mouse button
+throw is determined by length of holding
+
+view pans to side shows animated character throwing 
+
+office - basic box
+
+class for lighting, 
+class for texturing{
+	applyTexture()
+}
+class for loading meshes{
+	has function hat returns an array of vertices
+}
+
+advanced camera control class
+
+class for physics{
+	
+}

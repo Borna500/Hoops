@@ -195,11 +195,11 @@ void drawBall(){
 }
 bool grounded = true;
 void ballMotion(int value){
+    if(abs(velocity[1]) < 0.5 && position[1] < 1){
+        velocity[0] = 0, velocity[2] = 0, velocity[1] = 0;
+        launched = false;
+    }
     if (launched == true){
-        if(velocity[1] == 0){
-            launched = false;
-            break;
-        }
     velocity[0] += acceleration[0]/60;
     velocity[1] += acceleration[1]/60;
     velocity[2] += acceleration[2]/60;

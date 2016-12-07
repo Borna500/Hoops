@@ -29,6 +29,9 @@
 /* Begin PBXFileReference section */
 		FD448C111DF8A41700EF319A /* math3D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = math3D.cpp; sourceTree = "<group>"; };
 		FD448C141DF8A53000EF319A /* math3D.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = math3D.h; sourceTree = "<group>"; };
+		FD448C161DF8CF6200EF319A /* hay.ppm */ = {isa = PBXFileReference; lastKnownFileType = text; path = hay.ppm; sourceTree = "<group>"; };
+		FD448C171DF8CF7100EF319A /* tree.ppm */ = {isa = PBXFileReference; lastKnownFileType = text; path = tree.ppm; sourceTree = "<group>"; };
+		FD448C181DF8CF9300EF319A /* crates.ppm */ = {isa = PBXFileReference; lastKnownFileType = text; path = crates.ppm; sourceTree = "<group>"; };
 		FDA790E11DEDE3A8001DAB5E /* PaperToss */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PaperToss; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDA790EB1DEDE3FD001DAB5E /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		FDA790ED1DEDE403001DAB5E /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -73,6 +76,9 @@
 			isa = PBXGroup;
 			children = (
 				FDA790F11DEDE427001DAB5E /* PaperToss.cpp */,
+				FD448C171DF8CF7100EF319A /* tree.ppm */,
+				FD448C181DF8CF9300EF319A /* crates.ppm */,
+				FD448C161DF8CF6200EF319A /* hay.ppm */,
 				FD448C141DF8A53000EF319A /* math3D.h */,
 				FD448C111DF8A41700EF319A /* math3D.cpp */,
 			);

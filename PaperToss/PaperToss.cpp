@@ -108,7 +108,136 @@ float lookatphi = 0;
 // y = eyeradius  * cos(eyephi)
 // z = eyeradius * sin(eyetheta) * sin(eyephi)
 
+bool textureToggle = false;
 
+GLubyte *img_data1;
+GLubyte *img_data2;
+GLubyte *img_data3;
+
+GLuint textures[3]; //array for storing the three different textures
+int width, height, ppmax;  //width, height, max variables for the file of the texures
+
+GLUquadricObj *sphereOBJ = NULL;
+
+void drawBall(){
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45, 1, 1, 100);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
+    glPushMatrix();
+    glTranslatef(position[0],position[1],position[2]);
+    //printf("%f",position[1]);
+    // glBindTexture(GL_TEXTURE_2D, textures[0]);
+    sphereOBJ = gluNewQuadric();
+    gluQuadricDrawStyle(sphereOBJ, GLU_FILL);
+    gluQuadricTexture(sphereOBJ, GL_TRUE);
+    gluQuadricNormals(sphereOBJ, GLU_SMOOTH);
+    
+    gluSphere(sphereOBJ, 1, 100, 100);
+    glPopMatrix();
+}
+
+GLubyte* LoadPPM(char* file, int* width, int* height, int* ppmax)
+{
+    GLubyte* img;
+    FILE *fd;
+    int n, m;
+    int  k, nm;
+    char c;
+    int i;
+    char b[100];
+    float s;
+    int red, green, blue;
+    
+    //first open file and check if it's an ASCII PPM (indicated by P3 at the start)
+    fd = fopen(file, "r");
+    fscanf(fd,"%[^\n] ",b);
+    if(b[0]!='P'|| b[1] != '3')
+    {
+        printf("%s is not a PPM file!\n",file);
+        exit(0);
+    }
+    printf("%s is a PPM file\n", file);
+    fscanf(fd, "%c",&c);
+    
+    //next, skip past the comments - any line starting with #
+    while(c == '#')
+    {
+        fscanf(fd, "%[^\n] ", b);
+        printf("%s\n",b);
+        fscanf(fd, "%c",&c);
+    }
+    ungetc(c,fd);
+    
+    // now get the dimensions and max colour value from the image
+    fscanf(fd, "%d %d %d", &n, &m, &k);
+    
+    printf("%d rows  %d columns  max value= %d\n",n,m,k);
+    
+    // calculate number of pixels and allocate storage for this
+    nm = n*m;
+    img = (GLubyte*)malloc(3*sizeof(GLuint)*nm);
+    s=255.0/k;
+    
+    // for every pixel, grab the read green and blue values, storing them in the image data array
+    for(i=0;i<nm;i++)
+    {
+        fscanf(fd,"%d %d %d",&red, &green, &blue );
+        img[3*nm-3*i-3]=red*s;
+        img[3*nm-3*i-2]=green*s;
+        img[3*nm-3*i-1]=blue*s;
+    }
+    
+    // finally, set the "return parameters" (width, height, max) and return the image array
+    *width = n;
+    *height = m;
+    *ppmax = k;
+    
+    return img;
+}
+
+// textures function
+void initTexture(void) {
+    img_data1 = LoadPPM("hay.ppm", &width, &height, &ppmax);    //loading the texture by using the LoadPPM function, into img_data1
+    img_data2 = LoadPPM("tree.ppm", &width, &height, &ppmax);
+    img_data3 = LoadPPM("crates.ppm", &width, &height, &ppmax);
+    
+    //enabling textures
+    glEnable(GL_TEXTURE_2D);
+    
+    glGenTextures(3, textures); //using three textures
+    glBindTexture(GL_TEXTURE_2D, textures[0]);  //binding the first texture stored in the textures array
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data1); //getting the necessary information of the texture
+    
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   //setting parameters
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
+    glBindTexture(GL_TEXTURE_2D, textures[1]);  //binding the first texture stored in the textures array
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data2); //getting the necessary information of the texture
+    
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   //setting parameters
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
+    glBindTexture(GL_TEXTURE_2D, textures[2]);  //binding the first texture stored in the textures array
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data3); //getting the necessary information of the texture
+    
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   //setting parameters
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
 
 void updateeyeposition(){
     
@@ -133,69 +262,62 @@ void drawFloor(){
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glColor3f(1, 0, 0);
         glBegin(GL_QUADS);
-        glVertex3f(5, 0, 5);
-        glVertex3f(5, 0, -5);
-        glVertex3f(-5, 0, -5);
-        glVertex3f(-5, 0, 5);
+            glVertex3f(5, 0, 5);
+            glVertex3f(5, 0, -5);
+            glVertex3f(-5, 0, -5);
+            glVertex3f(-5, 0, 5);
         glEnd();
     glPopMatrix();
     
     //ceiling
     glPushMatrix();
-    glTranslatef(0, 10, 0);
-    glBegin(GL_QUADS);
-    glVertex3f(5, 0, 5);
-    glVertex3f(5, 0, -5);
-    glVertex3f(-5, 0, -5);
-    glVertex3f(-5, 0, 5);
-    glEnd();
+        glTranslatef(0, 10, 0);
+        glBegin(GL_QUADS);
+            glVertex3f(5, 0, 5);
+            glVertex3f(5, 0, -5);
+            glVertex3f(-5, 0, -5);
+            glVertex3f(-5, 0, 5);
+        glEnd();
     glPopMatrix();
     
     //right wall
     glPushMatrix();
-    glTranslatef(-5, 5, 0);
-    glRotatef(90, 0, 0, 1);
-    glBegin(GL_QUADS);
-    glVertex3f(5, 0, 5);
-    glVertex3f(5, 0, -5);
-    glVertex3f(-5, 0, -5);
-    glVertex3f(-5, 0, 5);
-    glEnd();
+        glTranslatef(-5, 5, 0);
+        glRotatef(90, 0, 0, 1);
+        glBegin(GL_QUADS);
+            glVertex3f(5, 0, 5);
+            glVertex3f(5, 0, -5);
+            glVertex3f(-5, 0, -5);
+            glVertex3f(-5, 0, 5);
+            glEnd();
     glPopMatrix();
     
     //left wall
     glPushMatrix();
-    glTranslatef(5, 5, 0);
-    glRotatef(90, 0, 0, 1);
-    glBegin(GL_QUADS);
-    glVertex3f(5, 0, 5);
-    glVertex3f(5, 0, -5);
-    glVertex3f(-5, 0, -5);
-    glVertex3f(-5, 0, 5);
-    glEnd();
+        glTranslatef(5, 5, 0);
+        glRotatef(90, 0, 0, 1);
+        glBegin(GL_QUADS);
+            glVertex3f(5, 0, 5);
+            glVertex3f(5, 0, -5);
+            glVertex3f(-5, 0, -5);
+            glVertex3f(-5, 0, 5);
+        glEnd();
     glPopMatrix();
     
     //back wall
     glPushMatrix();
-    glTranslatef(0, 5, 5);
-    glRotatef(90, 1, 0, 0);
-    glBegin(GL_QUADS);
-    glVertex3f(5, 0, 5);
-    glVertex3f(5, 0, -5);
-    glVertex3f(-5, 0, -5);
-    glVertex3f(-5, 0, 5);
-    glEnd();
+        glTranslatef(0, 5, 5);
+        glRotatef(90, 1, 0, 0);
+        glBegin(GL_QUADS);
+            glVertex3f(5, 0, 5);
+            glVertex3f(5, 0, -5);
+            glVertex3f(-5, 0, -5);
+            glVertex3f(-5, 0, 5);
+        glEnd();
     glPopMatrix();
 }
 
-void drawBall(){
-    glColor3f(1, 1, 1);
-    glPushMatrix();
-    glTranslatef(position[0],position[1],position[2]);
-    glutSolidSphere(1, 100, 100);
-    //glutSolidCube(1);
-    glPopMatrix();
-}
+
 
 void drawBasket() {
     glColor3f(1,0,0);
@@ -380,6 +502,30 @@ void keyboard(unsigned char key, int x, int y)
                 eyephi -= 0.05;
             }           
             break;
+        case '1':
+            if (textureToggle == true){
+                glEnable(GL_TEXTURE_2D);
+                textureToggle = false;
+            } else {
+                glDisable(GL_TEXTURE_2D);
+                textureToggle = true;
+            }
+            break;
+            
+        case '2':
+            glBindTexture(GL_TEXTURE_2D, textures[0]);
+            // drawBall();
+            break;
+            
+        case '3':
+            glBindTexture(GL_TEXTURE_2D, textures[1]);
+            // drawBall();
+            break;
+            
+        case '4':
+            glBindTexture(GL_TEXTURE_2D, textures[2]);
+            // drawBall();
+            break;
 
     }
     glutPostRedisplay();
@@ -426,8 +572,9 @@ void init(void)
     glLightfv(GL_LIGHT1, GL_SPECULAR, spec0);
 
     
-    glMatrixMode(GL_PROJECTION); 
-    glFrustum(-10,10,-10,10,0,1000);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+//    glFrustum(-10,10,-10,10,0,1000);
     gluPerspective(90, 1, 1, 1000);
 
 }
@@ -439,22 +586,18 @@ void display(void)
 {
     float origin[3] = {0,0,0};
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    /************************************************************************
-     
-                                    CAMERA SET UP
-     
-     ************************************************************************/
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-    glMatrixMode(GL_MODELVIEW);
+
     updateeyeposition();
     updatelookatposition();
-    glLoadIdentity();
     gluLookAt(eye[0],eye[1],eye[2], lookat[0],lookat[1],lookat[2], 0, 1, 0);
     glLightfv(GL_LIGHT0, GL_POSITION, light1_pos);
     glLightfv(GL_LIGHT1, GL_POSITION, light2_pos);
     
+    glDisable(GL_TEXTURE_2D);
     drawFloor();
+    if(textureToggle == true){
+        glEnable(GL_TEXTURE_2D);
+    }
     drawBall();
     drawBasket();
     glutSwapBuffers();
@@ -659,6 +802,7 @@ int main(int argc, char** argv)
     //glCullFace(GL_FRONT);
     //glEnable(GL_CULL_FACE);
     init();
+    initTexture();
     callbackinit();
 
     glutMainLoop();             //starts the event loop

@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <ctime>
 #include <cmath>
+#include <string>
 #include "math3D.h"
 
 int firstwindow;
@@ -50,6 +51,8 @@ float averageZVelocity;
 float windspeed = 0;
 float position[] = {0,1,-4};
 float startingPos[] = {0,1,-4};
+float basketPos[] = {0, 0, 4};
+float basketRadius = 1;
 float velocity[]  = {0,0,0};
 float acceleration[] = {windspeed,-100,0};
 
@@ -64,7 +67,7 @@ float light2_pos[]= {0,0,0,1}; //last num one is pofloat light
 
 float angle1 = 0.0f;
 /* display function - GLUT display callback function
- *		clears the screen, sets the camera position, draws the ground plane and movable box
+ *      clears the screen, sets the camera position, draws the ground plane and movable box
  */
 int mapSize = 300;
 float heightMap[1000][1000];
@@ -193,8 +196,20 @@ void drawBall(){
     //glutSolidCube(1);
     glPopMatrix();
 }
+
+void drawBasket() {
+    glColor3f(1,0,0);
+    glPushMatrix();
+        glTranslatef(basketPos[0], basketPos[1], basketPos[2]);
+        glRotatef(90, 1, 0, 0);
+        glutSolidTorus(basketRadius / 2, basketRadius, 100, 100);
+    glPopMatrix();
+}
+
 bool grounded = true;
+bool bounced = false;
 void ballMotion(int value){
+
     if(abs(velocity[1]) < 0.5 && position[1] < 1){
         velocity[0] = 0, velocity[2] = 0, velocity[1] = 0;
         launched = false;
@@ -222,22 +237,51 @@ void ballMotion(int value){
 //    }
     
         if (position[2] > 5 ){
+            velocity[2] = -1*(velocity[2] - 0.5*velocity[2]);
+            position[2] = 5.0 + velocity[2]/60;
             printf("out of z pos wall");
         }
         else if (position[2] < -5 ){
+            velocity[2] = -1*(velocity[2] - 0.5*velocity[2]);
+            position[2] = -5.0 + velocity[2]/60;
             printf("out of z neg wall");
         }
         if (position[0] < -5){
+            velocity[0] = -1*(velocity[0] - 0.5*velocity[0]);
+            position[0] = -5.0 + velocity[0]/60;
             printf("out of x neg wall");
         }
         else if (position[0] > 5){
+            velocity[0] = -1*(velocity[0] - 0.5*velocity[0]);
+            position[0] = 5.0 + velocity[0]/60;
             printf("out of x pos wall");
         }
         if (position[1] < 1){
             //printf("%f",position[1]);
             velocity[1] = -1*(velocity[1] - 0.5*velocity[1]);       //lose half magnitude and reverse direction
             position[1] = 1.0 + velocity[1]/60;
-            
+            bounced = true;
+        }
+        //Intersection with inside of basket (scoring)
+        if ((position[0] > (basketPos[0] - basketRadius)) && (position[0] < (basketPos[0] + basketRadius))) {
+            if ((position[2] > (basketPos[2] - basketRadius)) && (position[2] < (basketPos[2] + basketRadius))) {
+                if (position[1] > 1.0f && position[1] < 2.0f && !bounced) {
+                    printf("YOU DID IT\n");
+                }
+            }
+        }
+        //Intersection with outside of basket (rim shot)
+         if ((position[0] > (basketPos[0] - basketRadius)) && (position[0] < (basketPos[0] + basketRadius))) {
+             if ((position[2] > (basketPos[2] - basketRadius)) && (position[2] < (basketPos[2] + basketRadius))) {
+                if (position[1] < 1.05f && bounced) {
+                    printf("BOUNCED\n");
+                     velocity[0] = -1*(velocity[0] - 0.5*velocity[0]);       //lose half magnitude and reverse direction
+                     position[0] = position[0] + velocity[0]/60;
+
+                     velocity[2] = -1*(velocity[2] - 0.5*velocity[2]);       //lose half magnitude and reverse direction
+                     position[2] = position[2] + velocity[2]/60;
+                }
+            }
         }
 
     
@@ -252,13 +296,13 @@ float input1, input2, input3;
 void keyboard(unsigned char key, int x, int y)
 {
 
-	/* key presses move the cube, if it isn't at the extents (hard-coded here) */
-	switch (key)
-	{
-		case 'q':
-		case 27:
-			exit (0);
-			break;
+    /* key presses move the cube, if it isn't at the extents (hard-coded here) */
+    switch (key)
+    {
+        case 'q':
+        case 27:
+            exit (0);
+            break;
             
         case 'u':
         case 'U':
@@ -334,47 +378,47 @@ void keyboard(unsigned char key, int x, int y)
         case 'C':
             if(eyephi > -1.5){
                 eyephi -= 0.05;
-            }        	
+            }           
             break;
 
-	}
-	glutPostRedisplay();
+    }
+    glutPostRedisplay();
 }
 
 void special(int key, int x, int y)
 {
 
-	switch(key)
-	{ case GLUT_KEY_UP:
+    switch(key)
+    { case GLUT_KEY_UP:
             eye[1] += 1;
             lookat[1] += 1;
-		break;
-		case GLUT_KEY_DOWN:
+        break;
+        case GLUT_KEY_DOWN:
             eye[1] -= 1;
             lookat[1] -= 1;
-		break;
-		case GLUT_KEY_LEFT:
+        break;
+        case GLUT_KEY_LEFT:
             eye[0] -= 1;
             lookat[0] -= 1;
-		break;
-		case GLUT_KEY_RIGHT:
+        break;
+        case GLUT_KEY_RIGHT:
             eye[0] += 1;
             lookat[0] += 1;
-		break;
-		
+        break;
+        
     }
-	glutPostRedisplay();
+    glutPostRedisplay();
 }
 
 void init(void)
-{	glClearColor(0, 0, 0, 0);
-	glColor3f(1,0,0);
+{   glClearColor(0, 0, 0, 0);
+    glColor3f(1,0,0);
     
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
     glLightfv(GL_LIGHT0, GL_AMBIENT, amb0);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diff0);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diff0);
     glLightfv(GL_LIGHT0, GL_SPECULAR, spec0);
 
     glLightfv(GL_LIGHT1, GL_AMBIENT, amb0);
@@ -393,8 +437,8 @@ void init(void)
 
 void display(void)
 {
-	float origin[3] = {0,0,0};
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    float origin[3] = {0,0,0};
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     /************************************************************************
      
@@ -407,11 +451,12 @@ void display(void)
     updatelookatposition();
     glLoadIdentity();
     gluLookAt(eye[0],eye[1],eye[2], lookat[0],lookat[1],lookat[2], 0, 1, 0);
-	glLightfv(GL_LIGHT0, GL_POSITION, light1_pos);
+    glLightfv(GL_LIGHT0, GL_POSITION, light1_pos);
     glLightfv(GL_LIGHT1, GL_POSITION, light2_pos);
     
     drawFloor();
     drawBall();
+    drawBasket();
     glutSwapBuffers();
     glutPostRedisplay();
     
@@ -470,7 +515,7 @@ bool calcIntersection(vec3D r0, vec3D rd) {
 }
 
 bool rayCast(float x, float y) {
-    GLint viewport[4];			//declaring arrays and variables
+    GLint viewport[4];          //declaring arrays and variables
     GLdouble modelview[16];
     GLdouble projection[16];
     float winX;
@@ -580,6 +625,7 @@ void mouse(int btn, int state, int x, int y){
             
             printf("%f,%f\n", averageXVelocity,averageZVelocity);
             launched = true;
+            bounced = false;
         }
     }
     
@@ -590,32 +636,32 @@ void callbackinit(){
 /* main function - program entry point */
 int main(int argc, char** argv)
 {
-	srand(time(NULL));
+    srand(time(NULL));
     
-	glutInit(&argc, argv);		//starts up GLUT
-	
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	
-	
-	glutInitWindowSize(800, 800);
-	glutInitWindowPosition(100, 100);
+    glutInit(&argc, argv);      //starts up GLUT
+    
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    
+    
+    glutInitWindowSize(800, 800);
+    glutInitWindowPosition(100, 100);
 
-	firstwindow = glutCreateWindow("Terrain");	//creates the window
+    firstwindow = glutCreateWindow("Terrain");  //creates the window
     
     
-	glutDisplayFunc(display);	//registers "display" as the display callback function
-	glutKeyboardFunc(keyboard);
+    glutDisplayFunc(display);   //registers "display" as the display callback function
+    glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
-	glutSpecialFunc(special);
+    glutSpecialFunc(special);
     
-	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     //glFrontFace((GL_CCW));
     //glCullFace(GL_FRONT);
     //glEnable(GL_CULL_FACE);
     init();
     callbackinit();
 
-	glutMainLoop();				//starts the event loop
+    glutMainLoop();             //starts the event loop
 
-	return(0);					//return may not be necessary on all compilers
+    return(0);                  //return may not be necessary on all compilers
 }

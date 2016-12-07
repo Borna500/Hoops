@@ -2,6 +2,12 @@
  * by R. Teather
  * Edited by Noel Brett
  */
+/* 
+ Borna Kalantar kalantb 001207031
+ Rebecca Tran tranr5 001425611
+ Neil Robichaud robichne 001425566
+ Sean McKay mckaysm 001423885
+ */
 
 #ifdef __APPLE__
 #  include <OpenGL/gl.h>
@@ -30,6 +36,7 @@ float shiny = 27.8;
 float yAngle = 0;
 float xAngle = 0;
 
+float boxDepth = 5;
 bool selected = false;
 bool throwing = false;
 bool launched = false;
@@ -84,7 +91,41 @@ float minHeight = 0;
 float maxHeight = 0;
 
 
+// BORNA UPDATE FROM HERE
+
+float eyeradius = 7;
+float eyetheta = 4.71;
+float eyephi = 1.43;
+
+float lookatradius = 0;
+float lookattheta = 0;
+float lookatphi = 0;
+
+// x = eyeradius * sin(eyephi) * cos(eyetheta)
+// y = eyeradius  * cos(eyephi)
+// z = eyeradius * sin(eyetheta) * sin(eyephi)
+
+
+
+void updateeyeposition(){
+    
+    eye[0] = eyeradius * sin(eyephi) * cos(eyetheta);
+    eye[1] = eyeradius  * cos(eyephi);
+    eye[2] = eyeradius * sin(eyetheta) * sin(eyephi);
+    
+}
+
+void updatelookatposition(){
+    
+    lookat[0] = lookatradius * sin(lookatphi) * cos(lookattheta);
+    lookat[1] = lookatradius  * cos(lookatphi);
+    lookat[2] = lookatradius * sin(lookattheta) * sin(lookatphi);
+}
+
+// BORNA UPDATE TO HERE
+
 void drawFloor(){
+    //floor
     glPushMatrix();
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glColor3f(1, 0, 0);
@@ -96,6 +137,7 @@ void drawFloor(){
         glEnd();
     glPopMatrix();
     
+    //ceiling
     glPushMatrix();
     glTranslatef(0, 10, 0);
     glBegin(GL_QUADS);
@@ -106,6 +148,7 @@ void drawFloor(){
     glEnd();
     glPopMatrix();
     
+    //right wall
     glPushMatrix();
     glTranslatef(-5, 5, 0);
     glRotatef(90, 0, 0, 1);
@@ -117,8 +160,9 @@ void drawFloor(){
     glEnd();
     glPopMatrix();
     
+    //left wall
     glPushMatrix();
-    glTranslatef(-5, 5, 0);
+    glTranslatef(5, 5, 0);
     glRotatef(90, 0, 0, 1);
     glBegin(GL_QUADS);
     glVertex3f(5, 0, 5);
@@ -128,40 +172,74 @@ void drawFloor(){
     glEnd();
     glPopMatrix();
     
-
-
+    //back wall
+    glPushMatrix();
+    glTranslatef(0, 5, 5);
+    glRotatef(90, 1, 0, 0);
+    glBegin(GL_QUADS);
+    glVertex3f(5, 0, 5);
+    glVertex3f(5, 0, -5);
+    glVertex3f(-5, 0, -5);
+    glVertex3f(-5, 0, 5);
+    glEnd();
+    glPopMatrix();
 }
 
 void drawBall(){
     glColor3f(1, 1, 1);
     glPushMatrix();
     glTranslatef(position[0],position[1],position[2]);
-    //glutSolidSphere(1, 100, 100);
-    glutSolidCube(1);
+    glutSolidSphere(1, 100, 100);
+    //glutSolidCube(1);
     glPopMatrix();
 }
 bool grounded = true;
 void ballMotion(int value){
     if (launched == true){
+        if(velocity[1] == 0){
+            launched = false;
+            break;
+        }
     velocity[0] += acceleration[0]/60;
     velocity[1] += acceleration[1]/60;
     velocity[2] += acceleration[2]/60;
     position[0] += velocity[0]/60;
     position[1] += velocity[1]/60;
     position[2] += velocity[2]/60;
-    if ((position[1]) < 1){
-        position[1] = 1;
-        velocity[0] = 0;
-        velocity[1] = 0;
-        velocity[2] = 0;
-        averageXVelocity = 0;
-        averageZVelocity = 0;
-        acceleration[0] = 0;
-        acceleration[2] = 0;
-        launched = false;
-        position[0] = startingPos[0], position[1] = startingPos[1], position[2] = startingPos[2];
+//    if ((position[1]) < 1){
+//        position[1] = 1;
+//        velocity[0] = 0;
+//        velocity[1] = 0;
         
-    }
+//        velocity[2] = 0;
+//        averageXVelocity = 0;
+//        averageZVelocity = 0;
+//        acceleration[0] = 0;
+//        acceleration[2] = 0;
+//        launched = false;
+//        position[0] = startingPos[0], position[1] = startingPos[1], position[2] = startingPos[2];
+//        
+//    }
+    
+        if (position[2] > 5 ){
+            printf("out of z pos wall");
+        }
+        else if (position[2] < -5 ){
+            printf("out of z neg wall");
+        }
+        if (position[0] < -5){
+            printf("out of x neg wall");
+        }
+        else if (position[0] > 5){
+            printf("out of x pos wall");
+        }
+        if (position[1] < 1){
+            //printf("%f",position[1]);
+            velocity[1] = -1*(velocity[1] - 0.5*velocity[1]);       //lose half magnitude and reverse direction
+            position[1] = 1.0 + velocity[1]/60;
+            
+        }
+
     
     
     }
@@ -203,7 +281,61 @@ void keyboard(unsigned char key, int x, int y)
             eye[1] = input2;
             eye[2] = input2;
             break;
-
+        case 'a':
+            lookatradius += 0.1;
+            break;
+            
+        case 'A':
+            lookatradius -= 0.1;
+            break;
+            
+            
+        case 's':
+            lookattheta += 0.05;
+            break;
+            
+            
+        case 'S':
+            lookattheta -= 0.05;
+            break;
+            
+        case 'd':
+            lookatphi += 0.05;
+            break;
+            
+        case 'D':
+            lookatphi -= 0.05;
+            break;
+            
+        case 'z':
+            eyeradius += 0.1;
+            break;
+            
+        case 'Z':
+            eyeradius -= 0.1;
+            break;
+            
+            
+        case 'x':
+            eyetheta += 0.05;
+            break;
+            
+            
+        case 'X':
+            eyetheta -= 0.05;
+            break;
+            
+        case 'c':
+            if(eyephi < 1.5){
+                eyephi += 0.05;
+            }
+            break;
+            
+        case 'C':
+            if(eyephi > -1.5){
+                eyephi -= 0.05;
+            }        	
+            break;
 
 	}
 	glutPostRedisplay();
@@ -270,11 +402,14 @@ void display(void)
      
      ************************************************************************/
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-    glMatrixMode(GL_MODELVIEW); 
+    glMatrixMode(GL_MODELVIEW);
+    updateeyeposition();
+    updatelookatposition();
     glLoadIdentity();
     gluLookAt(eye[0],eye[1],eye[2], lookat[0],lookat[1],lookat[2], 0, 1, 0);
 	glLightfv(GL_LIGHT0, GL_POSITION, light1_pos);
     glLightfv(GL_LIGHT1, GL_POSITION, light2_pos);
+    
     drawFloor();
     drawBall();
     glutSwapBuffers();

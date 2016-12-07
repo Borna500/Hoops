@@ -317,7 +317,12 @@ void drawFloor(){
     glPopMatrix();
 }
 
-
+void resetBall() {
+    position[0] = startingPos[0]; position[1] = startingPos[1]; position[2] = startingPos[2];
+    velocity[0] = 0.0f; velocity[1] = 0.0f; velocity[2] = 0.0f;
+    acceleration[0] = windspeed; acceleration[1] = -100.0f; acceleration[2] = 0.0f;
+    launched = false;
+}
 
 void drawBasket() {
     glColor3f(1,0,0);
@@ -335,6 +340,7 @@ void ballMotion(int value){
     if(abs(velocity[1]) < 0.5 && position[1] < 1){
         velocity[0] = 0, velocity[2] = 0, velocity[1] = 0;
         launched = false;
+        resetBall();
     }
     if (launched == true){
     velocity[0] += acceleration[0]/60;

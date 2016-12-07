@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FD448C121DF8A41700EF319A /* math3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD448C111DF8A41700EF319A /* math3D.cpp */; };
 		FDA790EC1DEDE3FD001DAB5E /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA790EB1DEDE3FD001DAB5E /* GLUT.framework */; };
 		FDA790EE1DEDE403001DAB5E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA790ED1DEDE403001DAB5E /* OpenGL.framework */; };
 		FDA790F01DEDE409001DAB5E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA790EF1DEDE409001DAB5E /* Cocoa.framework */; };
@@ -26,6 +27,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FD448C111DF8A41700EF319A /* math3D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = math3D.cpp; sourceTree = "<group>"; };
+		FD448C141DF8A53000EF319A /* math3D.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = math3D.h; sourceTree = "<group>"; };
 		FDA790E11DEDE3A8001DAB5E /* PaperToss */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PaperToss; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDA790EB1DEDE3FD001DAB5E /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		FDA790ED1DEDE403001DAB5E /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -70,6 +73,8 @@
 			isa = PBXGroup;
 			children = (
 				FDA790F11DEDE427001DAB5E /* PaperToss.cpp */,
+				FD448C141DF8A53000EF319A /* math3D.h */,
+				FD448C111DF8A41700EF319A /* math3D.cpp */,
 			);
 			path = PaperToss;
 			sourceTree = "<group>";
@@ -130,6 +135,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD448C121DF8A41700EF319A /* math3D.cpp in Sources */,
 				FDA790F21DEDE427001DAB5E /* PaperToss.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -251,6 +257,7 @@
 				FDA790EA1DEDE3A8001DAB5E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -404,12 +404,14 @@ void drawFloor(){
     glPopMatrix();
 }
 
+bool bounced = false;
 
 void resetBall() {
     position[0] = startingPos[0]; position[1] = startingPos[1]; position[2] = startingPos[2];
     velocity[0] = 0.0f; velocity[1] = 0.0f; velocity[2] = 0.0f;
     acceleration[0] = windspeed; acceleration[1] = -100.0f; acceleration[2] = 0.0f;
     launched = false;
+    bounced = false;
 }
 
 void drawBasket() {
@@ -432,10 +434,10 @@ void startTimer(){
     groundstartTime=(GLfloat)glutGet(GLUT_ELAPSED_TIME);
 }
 
-bool bounced = false;
+
 void ballMotion(int value){
     //printf("%f\n",position[1]);
-    if(position[1] < 1.5){
+    if(bounced){
        
         if (pendingStop == false){
             pendingStop = true;
@@ -451,13 +453,13 @@ void ballMotion(int value){
             }
         }
     }
-    if (launched == true){
-    velocity[0] += acceleration[0]/60;
-    velocity[1] += acceleration[1]/60;
-    velocity[2] += acceleration[2]/60;
-    position[0] += velocity[0]/60;
-    position[1] += velocity[1]/60;
-    position[2] += velocity[2]/60;
+    if (launched == true) {
+	    velocity[0] += acceleration[0]/60;
+	    velocity[1] += acceleration[1]/60;
+	    velocity[2] += acceleration[2]/60;
+	    position[0] += velocity[0]/60;
+	    position[1] += velocity[1]/60;
+	    position[2] += velocity[2]/60;
 
     
         if (position[2] > 5 ){
@@ -499,7 +501,6 @@ void ballMotion(int value){
          if ((position[0] > (basketPos[0] - basketRadius)) && (position[0] < (basketPos[0] + basketRadius))) {
              if ((position[2] > (basketPos[2] - basketRadius)) && (position[2] < (basketPos[2] + basketRadius))) {
                 if (position[1] < basketPos[1]  && bounced) {
-                if (position[1] < 1.05f && bounced) {
                      velocity[0] = -1*(velocity[0] - 0.5*velocity[0]);       //lose half magnitude and reverse direction
                      position[0] = position[0] + velocity[0]/60;
 
@@ -509,11 +510,9 @@ void ballMotion(int value){
             }
         }
 
-    
-    
     }
+
     glutTimerFunc(17,ballMotion,0);
-}
 
 }
 

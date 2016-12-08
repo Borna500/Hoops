@@ -342,7 +342,9 @@ void drawFloor(){
     glPushMatrix();
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glColor3f(1, 0, 0);
+    
         glBegin(GL_QUADS);
+            glNormal3f(0, 1, 0);
             glVertex3f(5, 0, 5);
             glVertex3f(5, 0, -5);
             glVertex3f(-5, 0, -5);
@@ -354,6 +356,7 @@ void drawFloor(){
     glPushMatrix();
         glTranslatef(0, 10, 0);
         glBegin(GL_QUADS);
+            glNormal3f(0, 1, 0);
             glVertex3f(5, 0, 5);
             glVertex3f(5, 0, -5);
             glVertex3f(-5, 0, -5);
@@ -366,6 +369,7 @@ void drawFloor(){
         glTranslatef(-5, 5, 0);
         glRotatef(90, 0, 0, 1);
         glBegin(GL_QUADS);
+            glNormal3f(1, 0, 0);
             glVertex3f(5, 0, 5);
             glVertex3f(5, 0, -5);
             glVertex3f(-5, 0, -5);
@@ -378,6 +382,7 @@ void drawFloor(){
         glTranslatef(5, 5, 0);
         glRotatef(90, 0, 0, 1);
         glBegin(GL_QUADS);
+            glNormal3f(1, 0, 0);
             glVertex3f(5, 0, 5);
             glVertex3f(5, 0, -5);
             glVertex3f(-5, 0, -5);
@@ -390,6 +395,7 @@ void drawFloor(){
         glTranslatef(0, 5, 5);
         glRotatef(90, 1, 0, 0);
         glBegin(GL_QUADS);
+            glNormal3f(0, 0, -1);
             glVertex3f(5, 0, 5);
             glVertex3f(5, 0, -5);
             glVertex3f(-5, 0, -5);
@@ -397,6 +403,7 @@ void drawFloor(){
         glEnd();
     glPopMatrix();
 }
+
 
 void resetBall() {
     position[0] = startingPos[0]; position[1] = startingPos[1]; position[2] = startingPos[2];
@@ -418,15 +425,31 @@ void drawBasket() {
         glutSolidTorus(basketRadius / 5, basketRadius, 100, 100);
     glPopMatrix();
 }
+bool pendingStop = false;
+float groundstartTime;
+float currentTime;
+void startTimer(){
+    groundstartTime=(GLfloat)glutGet(GLUT_ELAPSED_TIME);
+}
 
-bool grounded = true;
 bool bounced = false;
 void ballMotion(int value){
-
-    if(abs(velocity[1]) < 0.5 && position[1] < 1){
-        velocity[0] = 0, velocity[2] = 0, velocity[1] = 0;
-        launched = false;
-        resetBall();
+    //printf("%f\n",position[1]);
+    if(position[1] < 1.5){
+       
+        if (pendingStop == false){
+            pendingStop = true;
+            startTimer();           //starts a 3 second timer
+        }
+        else{
+            currentTime = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
+            printf("%f\n", currentTime-groundstartTime);
+            if (currentTime - groundstartTime > 5000){
+                pendingStop = false;
+                launched = false;
+                resetBall();
+            }
+        }
     }
     if (launched == true){
     velocity[0] += acceleration[0]/60;
@@ -476,6 +499,7 @@ void ballMotion(int value){
          if ((position[0] > (basketPos[0] - basketRadius)) && (position[0] < (basketPos[0] + basketRadius))) {
              if ((position[2] > (basketPos[2] - basketRadius)) && (position[2] < (basketPos[2] + basketRadius))) {
                 if (position[1] < basketPos[1]  && bounced) {
+                if (position[1] < 1.05f && bounced) {
                      velocity[0] = -1*(velocity[0] - 0.5*velocity[0]);       //lose half magnitude and reverse direction
                      position[0] = position[0] + velocity[0]/60;
 
@@ -489,6 +513,7 @@ void ballMotion(int value){
     
     }
     glutTimerFunc(17,ballMotion,0);
+}
 
 }
 
@@ -836,7 +861,7 @@ int main(int argc, char** argv)
     glutInitWindowSize(800, 800);
     glutInitWindowPosition(100, 100);
 
-    firstwindow = glutCreateWindow("Terrain");  //creates the window
+    firstwindow = glutCreateWindow("BallToss");  //creates the window
     
     
     glutDisplayFunc(display);   //registers "display" as the display callback function

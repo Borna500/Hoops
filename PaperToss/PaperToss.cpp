@@ -24,7 +24,10 @@
 #include <cmath>
 #include <string>
 #include "math3D.h"
+#include <string>
+#include <sstream>
 
+using namespace std;
 int firstwindow;
 int secondwindow;
 float amb0[4] = {1,1,1,1};
@@ -36,7 +39,9 @@ float m_spec[] = {0.99, 0.91, 0.81, 1.0};
 float shiny = 27.8;
 float yAngle = 0;
 float xAngle = 0;
-
+int intscorecounter = 0;
+string stringscorecounter = "";
+const char* counterstring;
 float boxDepth = 5;
 bool selected = false;
 bool throwing = false;
@@ -120,11 +125,7 @@ int width, height, ppmax;  //width, height, max variables for the file of the te
 GLUquadricObj *sphereOBJ = NULL;
 
 void drawBall(){
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45, 1, 1, 100);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+
     
     glPushMatrix();
     glTranslatef(position[0],position[1],position[2]);
@@ -255,7 +256,42 @@ void updatelookatposition(){
 }
 
 // BORNA UPDATE TO HERE
+void textprinter(int x, int y, char* text)
+{
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, 800, 0, 800, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    //glDisable(GL_DEPTH_TEST);
+    glRasterPos2i(x,y);
 
+    glColor3f(0,0,1);
+    char* c;  //character iterator (ptr)
+    for(c = text; *c != '\0'; c++) //stop when we hit null character
+    {
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *c); //print one char
+    }
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+//    glEnable(GL_DEPTH_TEST);
+    
+}
+void changetostring(int integer){
+    
+    stringstream streamint;
+    
+    streamint << integer;
+    
+    stringscorecounter = streamint.str();
+    
+    counterstring = stringscorecounter.c_str();;
+    
+}
 void drawFloor(){
     //floor
     glPushMatrix();
@@ -349,20 +385,7 @@ void ballMotion(int value){
     position[0] += velocity[0]/60;
     position[1] += velocity[1]/60;
     position[2] += velocity[2]/60;
-//    if ((position[1]) < 1){
-//        position[1] = 1;
-//        velocity[0] = 0;
-//        velocity[1] = 0;
-        
-//        velocity[2] = 0;
-//        averageXVelocity = 0;
-//        averageZVelocity = 0;
-//        acceleration[0] = 0;
-//        acceleration[2] = 0;
-//        launched = false;
-//        position[0] = startingPos[0], position[1] = startingPos[1], position[2] = startingPos[2];
-//        
-//    }
+
     
         if (position[2] > 5 ){
             velocity[2] = -1*(velocity[2] - 0.5*velocity[2]);
@@ -395,6 +418,8 @@ void ballMotion(int value){
             if ((position[2] > (basketPos[2] - basketRadius)) && (position[2] < (basketPos[2] + basketRadius))) {
                 if (position[1] > 1.0f && position[1] < 2.0f && !bounced) {
                     printf("YOU DID IT\n");
+                    resetBall();
+                    intscorecounter++;
                 }
             }
         }
@@ -532,6 +557,12 @@ void keyboard(unsigned char key, int x, int y)
             glBindTexture(GL_TEXTURE_2D, textures[2]);
             // drawBall();
             break;
+            
+        case 'r':
+            case 'R':
+            resetBall();
+            break;
+    
 
     }
     glutPostRedisplay();
@@ -580,7 +611,7 @@ void init(void)
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-//    glFrustum(-10,10,-10,10,0,1000);
+    glFrustum(-10,10,-10,10,0,1000);
     gluPerspective(90, 1, 1, 1000);
 
 }
@@ -592,9 +623,14 @@ void display(void)
 {
     float origin[3] = {0,0,0};
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    glMatrixMode(GL_MODELVIEW);
     updateeyeposition();
     updatelookatposition();
+    glLoadIdentity();
+    changetostring(intscorecounter);
+    glDisable(GL_LIGHTING);
+    textprinter(750,780, (char*)counterstring);
+    glEnable(GL_LIGHTING);
     gluLookAt(eye[0],eye[1],eye[2], lookat[0],lookat[1],lookat[2], 0, 1, 0);
     glLightfv(GL_LIGHT0, GL_POSITION, light1_pos);
     glLightfv(GL_LIGHT1, GL_POSITION, light2_pos);
@@ -707,48 +743,6 @@ bool rayCast(float x, float y) {
 }
 
 
-
-//void mouse(int btn, int state, int x, int y){
-//    if (btn == GLUT_LEFT_BUTTON && launched == false && selected == true){
-//        if (state == GLUT_DOWN){
-//            throwing = true;
-//            startingMousepos[0] = x, startingMousepos[1] = y;       //store the starting mouse position
-//            startTime=(GLfloat)glutGet(GLUT_ELAPSED_TIME);          //store the time when the user first clicks down
-//        }
-//        else if(state == GLUT_UP && throwing == true){
-//            
-//            finalMousepos[0] = x;
-//            finalMousepos[1] = y;
-//            endTime=(GLfloat)glutGet(GLUT_ELAPSED_TIME);          //store the time when the user first clicks down
-//            
-//            float timeElapsed = endTime - startTime;
-//            float dy = -(finalMousepos[1] - startingMousepos[1]);
-//            float dx = -(finalMousepos[0] - startingMousepos[0]);
-//            
-//            averageXVelocity = dx/timeElapsed;
-//            averageZVelocity = dy/timeElapsed;
-//                        velocity[0] += averageXVelocity*5;
-//                        velocity[1] = averageZVelocity*5;
-//                        velocity[2] += averageZVelocity*5;
-//            
-//            printf("%f,%f\n", averageXVelocity,averageZVelocity);
-//            launched = true;
-//            selected = false;
-//            throwing = false;
-//        }
-//    }
-//    //Ray casting for selecting the ball
-//    else if (btn == GLUT_LEFT_BUTTON && launched == false && selected == false) {
-//        if (state == GLUT_DOWN) {
-//            if (rayCast(float(x), float(y)) == true) {
-//                printf("Selected the object\n");
-//                selected = true;
-//            }
-//        }
-//    }
-//    
-//}
-
 void mouse(int btn, int state, int x, int y){
     
     if (btn == GLUT_LEFT_BUTTON && launched == false){
@@ -769,7 +763,7 @@ void mouse(int btn, int state, int x, int y){
             averageXVelocity = dx/timeElapsed;
             averageZVelocity = dy/timeElapsed;
             velocity[0] += averageXVelocity*5;
-            velocity[1] = averageZVelocity*5;
+            velocity[1] = 20;
             velocity[2] += averageZVelocity*5;
             
             printf("%f,%f\n", averageXVelocity,averageZVelocity);
@@ -808,7 +802,7 @@ int main(int argc, char** argv)
     //glCullFace(GL_FRONT);
     //glEnable(GL_CULL_FACE);
     init();
-    initTexture();
+    //initTexture();
     callbackinit();
 
     glutMainLoop();             //starts the event loop

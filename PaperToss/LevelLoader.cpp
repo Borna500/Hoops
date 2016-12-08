@@ -15,10 +15,10 @@
 Level::Level(int i) {
 	switch(i) {
 		case 1:
-			// Object leftWall = new Object();
-			// Object rightWall = new Object();
-			// Object backWall = new Object();
-			// Object wall4 = 
+			Object leftWall = new Object();
+			Object rightWall = new Object();
+			Object backWall = new Object();
+			Object floor = new Object();
 		break;
 
 		case 2:

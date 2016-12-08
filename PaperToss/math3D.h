@@ -6,6 +6,16 @@ MacID: mckaysm, tranr5
 #ifndef MATH_3D_H
 #define MATH_3D_H
 
+#ifdef __APPLE__
+#  include <OpenGL/gl.h>
+#  include <OpenGL/glu.h>
+#  include <GLUT/glut.h>
+#else
+#  include <GL/gl.h>
+#  include <GL/glu.h>
+#  include <GL/freeglut.h>	
+#endif
+
 //defining each of the classes
 class point3D;
 class vec3D;

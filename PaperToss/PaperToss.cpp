@@ -24,6 +24,7 @@
 #include <cmath>
 #include <string>
 #include "math3D.h"
+#include "LevelLoader.h"
 #include <string>
 #include <sstream>
 
@@ -56,8 +57,11 @@ float averageZVelocity;
 float windspeed = 0;
 float position[] = {0,1,-4};
 float startingPos[] = {0,1,-4};
-float basketPos[] = {0, 0, 4};
+
 float basketRadius = 1;
+float basketheight = 2;
+float basketPos[] = {0, basketheight, 4};
+
 float velocity[]  = {0,0,0};
 float acceleration[] = {windspeed,-100,0};
 
@@ -78,6 +82,17 @@ int mapSize = 300;
 float heightMap[1000][1000];
 int maxX = mapSize;
 int maxZ = mapSize;
+
+float eyex = 0;
+float eyey = 1;
+float eyez = -7;
+
+float lookatx = 0;
+float lookaty = 0;
+float lookatz = 0;
+
+
+bool spherical = false; 
 
 //self explanatory various states of the mesh
 enum mode{solid, wire, both};
@@ -241,19 +256,49 @@ void initTexture(void) {
 }
 
 void updateeyeposition(){
-    
-    eye[0] = eyeradius * sin(eyephi) * cos(eyetheta);
-    eye[1] = eyeradius  * cos(eyephi);
-    eye[2] = eyeradius * sin(eyetheta) * sin(eyephi);
-    
+
+	if (spherical){
+
+		eye[0] = eyeradius * sin(eyephi) * cos(eyetheta);
+		eye[1] = eyeradius  * cos(eyephi);
+		eye[2] = eyeradius * sin(eyetheta) * sin(eyephi);
+	}
+
+	else{
+
+		eye[0] = eyex;
+		eye[1] = eyey;
+		eye[2] = eyez;
+	}
+
+}
+void sphericaltocartesion(){
+	eyex = eyeradius * sin(eyephi) * cos(eyetheta);
+	eyey = eyeradius  * cos(eyephi);
+	eyez = eyeradius * sin(eyetheta) * sin(eyephi);
+
+}
+void cartesiontospherical(){
+	eyeradius = sqrtf(eyex * eyex + eyey * eyey + eyez * eyez);
+	eyephi = acos(eyey/eyeradius);
+	eyetheta = atan(eyez/eyex);
+	if(eyetheta > 0 ){
+	eyetheta += 3.14;
+	}
+	if(eyez > 0){
+		eyetheta += 3.14;
+	}
+
 }
 
-void updatelookatposition(){
+
+
+// void updatelookatposition(){
     
-    lookat[0] = lookatradius * sin(lookatphi) * cos(lookattheta);
-    lookat[1] = lookatradius  * cos(lookatphi);
-    lookat[2] = lookatradius * sin(lookattheta) * sin(lookatphi);
-}
+//     lookat[0] = lookatradius * sin(lookatphi) * cos(lookattheta);
+//     lookat[1] = lookatradius  * cos(lookatphi);
+//     lookat[2] = lookatradius * sin(lookattheta) * sin(lookatphi);
+// }
 
 // BORNA UPDATE TO HERE
 void textprinter(int x, int y, char* text)
@@ -364,8 +409,13 @@ void drawBasket() {
     glColor3f(1,0,0);
     glPushMatrix();
         glTranslatef(basketPos[0], basketPos[1], basketPos[2]);
+        glPushMatrix();
+            glTranslatef(0, 0.8, 1);
+            glScalef(2.5, 2.5, 0.1);
+            glutSolidCube(1);
+        glPopMatrix();
         glRotatef(90, 1, 0, 0);
-        glutSolidTorus(basketRadius / 2, basketRadius, 100, 100);
+        glutSolidTorus(basketRadius / 5, basketRadius, 100, 100);
     glPopMatrix();
 }
 
@@ -416,8 +466,7 @@ void ballMotion(int value){
         //Intersection with inside of basket (scoring)
         if ((position[0] > (basketPos[0] - basketRadius)) && (position[0] < (basketPos[0] + basketRadius))) {
             if ((position[2] > (basketPos[2] - basketRadius)) && (position[2] < (basketPos[2] + basketRadius))) {
-                if (position[1] > 1.0f && position[1] < 2.0f && !bounced) {
-                    printf("YOU DID IT\n");
+                if (position[1] > basketPos[1] && position[1] < (basketPos[1] + 0.5f) && !bounced) {
                     resetBall();
                     intscorecounter++;
                 }
@@ -426,8 +475,7 @@ void ballMotion(int value){
         //Intersection with outside of basket (rim shot)
          if ((position[0] > (basketPos[0] - basketRadius)) && (position[0] < (basketPos[0] + basketRadius))) {
              if ((position[2] > (basketPos[2] - basketRadius)) && (position[2] < (basketPos[2] + basketRadius))) {
-                if (position[1] < 1.05f && bounced) {
-                    printf("BOUNCED\n");
+                if (position[1] < basketPos[1]  && bounced) {
                      velocity[0] = -1*(velocity[0] - 0.5*velocity[0]);       //lose half magnitude and reverse direction
                      position[0] = position[0] + velocity[0]/60;
 
@@ -457,81 +505,81 @@ void keyboard(unsigned char key, int x, int y)
             exit (0);
             break;
             
-        case 'u':
-        case 'U':
-            printf("Type the x,y,z values of your look at \n");
-            scanf("%f", &input1);
-            scanf("%f", &input2);
-            scanf("%f", &input3);
-            lookat[0] = input1;
-            lookat[1] = input2;
-            lookat[2] = input2;
-            break;
-            
-        case 'v':
-        case 'V':
-            printf("Type the x,y,z values of your camera \n");
-            scanf("%f", &input1);
-            scanf("%f", &input2);
-            scanf("%f", &input3);
-            eye[0] = input1;
-            eye[1] = input2;
-            eye[2] = input2;
-            break;
+		case 'W':
+        case 'w':
+      	eyez +=0.1;
+        	break;
+
         case 'a':
-            lookatradius += 0.1;
-            break;
-            
         case 'A':
-            lookatradius -= 0.1;
-            break;
-            
-            
+          	eyex +=0.1;
+        	break;
+
+    	case 'S':
         case 's':
-            lookattheta += 0.05;
-            break;
-            
-            
-        case 'S':
-            lookattheta -= 0.05;
-            break;
-            
-        case 'd':
-            lookatphi += 0.05;
-            break;
-            
+        	eyez -=0.1;
+        	break;
+
         case 'D':
-            lookatphi -= 0.05;
-            break;
-            
+        case 'd':
+          	eyex -=0.1;
+        	break;
+
+        case 'U':
+        case 'u':
+          	eyey +=0.1;
+        	break;
+
+        case 'I':
+        case 'i':
+        	if (eyey > 0) {
+        		eyey -=0.1;
+        	}
+        	break;
+
         case 'z':
-            eyeradius += 0.1;
-            break;
-            
+        	eyeradius += 0.1;
+        	break;
+
         case 'Z':
-            eyeradius -= 0.1;
-            break;
-            
-            
+        	eyeradius -= 0.1;
+        	break;
+
+
         case 'x':
-            eyetheta += 0.05;
-            break;
-            
-            
+        	eyetheta += 0.05;
+        	break;
+
+
         case 'X':
-            eyetheta -= 0.05;
-            break;
-            
+        	eyetheta -= 0.05;
+        	break;
+
         case 'c':
-            if(eyephi < 1.5){
-                eyephi += 0.05;
-            }
-            break;
-            
+        	if(eyephi < 1.5){
+        	eyephi += 0.05;
+        	}
+      		break;
+
         case 'C':
-            if(eyephi > -1.5){
-                eyephi -= 0.05;
-            }           
+        	if(eyephi > -1.5){
+        	eyephi -= 0.05;
+        	}        	
+        	break;
+
+        case 'm':
+        case 'M':
+        	if (spherical){
+        	sphericaltocartesion();
+        	spherical = false;
+	        }
+
+        	else{
+        	cartesiontospherical();
+        	spherical = true;
+        	}
+        	break;
+          
             break;
         case '1':
             if (textureToggle == true){
@@ -625,7 +673,6 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     updateeyeposition();
-    updatelookatposition();
     glLoadIdentity();
     changetostring(intscorecounter);
     glDisable(GL_LIGHTING);
@@ -637,11 +684,11 @@ void display(void)
     
     glDisable(GL_TEXTURE_2D);
     drawFloor();
+    drawBasket();
     if(textureToggle == true){
         glEnable(GL_TEXTURE_2D);
     }
     drawBall();
-    drawBasket();
     glutSwapBuffers();
     glutPostRedisplay();
     
@@ -802,7 +849,7 @@ int main(int argc, char** argv)
     //glCullFace(GL_FRONT);
     //glEnable(GL_CULL_FACE);
     init();
-    //initTexture();
+    initTexture();
     callbackinit();
 
     glutMainLoop();             //starts the event loop

@@ -418,6 +418,7 @@ void drawFloor(){
 bool bounced = false;
 
 void resetBall() {
+    windspeed = -50 + rand()%100;
     position[0] = startingPos[0]; position[1] = startingPos[1]; position[2] = startingPos[2];
     velocity[0] = 0.0f; velocity[1] = 0.0f; velocity[2] = 0.0f;
     acceleration[0] = windspeed; acceleration[1] = -100.0f; acceleration[2] = 0.0f;
@@ -558,7 +559,7 @@ float currentTime;
 void startTimer(){
     groundstartTime=(GLfloat)glutGet(GLUT_ELAPSED_TIME);
 }
-
+float terminalWind = 50;
 
 void ballMotion(int value){
     //printf("%f\n",position[1]);
@@ -581,6 +582,9 @@ void ballMotion(int value){
         }
     }
     if (launched == true) {
+        if(abs(velocity[0]) < terminalWind){
+            velocity[0] += windspeed/60;
+        }
 	    velocity[0] += acceleration[0]/60;
 	    velocity[1] += acceleration[1]/60;
 	    velocity[2] += acceleration[2]/60;
@@ -823,8 +827,9 @@ void special(int key, int x, int y)
     glutPostRedisplay();
 }
 
-void init(void)
-{   glClearColor(0, 0, 0, 0);
+void init(void){
+    resetBall();
+    glClearColor(0, 0, 0, 0);
     glColor3f(1,0,0);
     
     glEnable(GL_LIGHTING);
@@ -990,7 +995,6 @@ bool rayCast(float x, float y) {
 
 
 void mouse(int btn, int state, int x, int y){
-    
     if (btn == GLUT_LEFT_BUTTON && launched == false){
         if (state == GLUT_DOWN){
             startingMousepos[0] = x, startingMousepos[1] = y;       //store the starting mouse position
@@ -1012,7 +1016,7 @@ void mouse(int btn, int state, int x, int y){
             velocity[1] = 20;
             velocity[2] += averageZVelocity*5;
             
-           // printf("%f,%f\n", averageXVelocity,averageZVelocity);
+            printf("%f\n", windspeed);
             launched = true;
             bounced = false;
             

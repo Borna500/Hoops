@@ -12,6 +12,12 @@
 #include "math3D.h"
 #include <vector>
 #include <stdio.h>
+float m_amb[] = {0.33, 0.22, 0.03, 1.0};
+float m_diff[] = {0.78, 0.57, 0.11, 1.0};
+float m_spec[] = {0.99, 0.91, 0.81, 1.0};
+
+float shiny = 27.8;
+
 Face::Face(){}
 
 Face::Face(point3D min, point3D max, int normalflip) {
@@ -66,10 +72,11 @@ void Face::calcNormal(int normalflip) {
 
 Object::Object(){}
 
-Object::Object(objectType o, point3D min, point3D max, int normalflip) {
+Object::Object(objectType o, point3D min, point3D max, int normalflip, int material) {
 	t = o;
 	objectFaces = new vector<Face*>();
-
+    materialIndex = material;
+    
 	switch (t) {
 		case plane:
 		{	
@@ -101,6 +108,7 @@ Level::Level(int l) {
 
 	point3D fBoundMin;
 	point3D fBoundMax;
+    //loadMaterials();
 
 
 	lvl = l;
@@ -204,17 +212,17 @@ Level::Level(int l) {
 		break;
 	}
 		printf("Left wall\n");
-		Object* leftWall = new Object(plane, lBoundMin, lBoundMax, 1);
+		Object* leftWall = new Object(plane, lBoundMin, lBoundMax, 1, 0);
 		printf("Right wall\n");
-		Object* rightWall = new Object(plane, rBoundMin, rBoundMax, -1);
+		Object* rightWall = new Object(plane, rBoundMin, rBoundMax, -1, 0);
 		printf("Back wall\n");
-		Object* backWall = new Object(plane, bBoundMin, bBoundMax, 1);
+		Object* backWall = new Object(plane, bBoundMin, bBoundMax, 1, 0);
 
-		Object* frontWall = new Object(plane, dBoundMin, dBoundMax, -1);
+		Object* frontWall = new Object(plane, dBoundMin, dBoundMax, -1, 0);
 		printf("Floor\n");
-		Object* floor = new Object(plane, fBoundMin, fBoundMax, 1);
+		Object* floor = new Object(plane, fBoundMin, fBoundMax, 1, 0);
 		printf("Ceiling\n");
-		Object* ceiling = new Object(plane, cBoundMin, cBoundMax, -1);
+		Object* ceiling = new Object(plane, cBoundMin, cBoundMax, -1, 0);
 
 		levelObjects->push_back(leftWall);
 		levelObjects->push_back(rightWall);
@@ -259,7 +267,7 @@ void Object::drawObject() {
 	//printf("There are %i faces\n", faces);
 	if (faces > 0) {
 		for (int i = 0; i < faces; i++) {
-			objectFaces->at(i)->drawFace();
+			objectFaces->at(i)->drawFace(0);
 		}
 	}
 }
@@ -277,8 +285,13 @@ int Object::testIntersection(float x, float y, float z, float ballRad) {
 	return -1;
 }
 
-void Face::drawFace() {
+
+void Face::drawFace(int i) { // i is the index of the material for this face
 	//printf("Drawing a face\n");
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb); //putting material onto the terrain
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_spec);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, m_diff);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny*128);
 	glBegin(GL_QUADS);
 		glNormal3f(normal.x, normal.y, normal.z);
 		glVertex3f(p0.x, p0.y, p0.z);
@@ -297,7 +310,7 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 	if (normal.x == 1) {
 		if (x - ballRad < min.x){
 			if (y >= min.y && y <= max.y && z >= min.z && z <= max.z) {
-				printf("OOPsx+\n");
+				//printf("OOPsx+\n");
 				return true;
 			}
 		}
@@ -307,7 +320,7 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 	else if (normal.x == -1) {
 		if (x + ballRad > max.x){
 			if (y >= min.y && y <= max.y && z >= min.z && z <= max.z) {
-				printf("OOPsx-\n");
+				//printf("OOPsx-\n");
 				return true;
 			}
 		}
@@ -317,7 +330,7 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 	else if (normal.y == 1) {
 		if (y - ballRad < min.y){
 			if (x >= min.x && x <= max.x && z >= min.z && z <= max.z) {
-				printf("OOPsy+\n");
+				//printf("OOPsy+\n");
 				return true;
 			}
 		}
@@ -353,4 +366,20 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 	return false;
 }
 
-
+//void Level::loadMaterials(){
+//    float matList[4][4] = {
+//        {0.135, 0.2225, 0.1575, 1.0}, //setting the material for the ambient, diffuse and specular values
+//        {0.54, 0.89, 0.63, 1.0},
+//        {0.316228, 0.316228, 0.316228, 1.0},
+//        {0.1}
+//    };
+//    materials.push_back(matList);
+//    float matList1[4][4] = {
+//        {0.0, 0.0, 0.0, 1.0}, //setting the material for the ambient, diffuse and specular values black plastic
+//        {0.01, 0.01, 0.01, 1.0},
+//        {0.50, 0.50, 0.50, 1.0},
+//        {0.25}
+//    };
+//    materials.push_back(matList1);
+//
+//}

@@ -18,7 +18,7 @@ using namespace std;
 
 enum objectType{plane, box};
 enum ballType{normal, rock, bouncy};
-
+//std::vector<float[4][4]> materials;
 class Face;
 class Object;
 class Level;
@@ -37,7 +37,7 @@ public:
 
 
 	bool testIntersection(float x, float y, float z, float ballRad);
-	void drawFace();
+	void drawFace(int i);
 	void calcNormal(int normalflip);
 	
 };
@@ -45,10 +45,10 @@ public:
 class Object {
 public:
 	Object();
-	Object(objectType o, point3D min, point3D max, int normalflip);
+	Object(objectType o, point3D min, point3D max, int normalflip, int materialIndex);
 	objectType t;
 	vector<Face*> *objectFaces;
-
+    int materialIndex;
 	int testIntersection(float x, float y, float z, float ballRad);
 	void drawObject();
 	
@@ -88,6 +88,7 @@ public:
 	
 
 };
+
 
 
 

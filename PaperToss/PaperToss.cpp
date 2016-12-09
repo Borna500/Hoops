@@ -49,13 +49,43 @@ point3D basketPos;
 int firstwindow;
 int secondwindow;
 //Lighting and materials
-float amb0[4] = {0.5,0.5,0.5,1};
+float m_amb1[] = {0.135, 0.2225, 0.1575, 1.0}; //setting the material for the ambient, diffuse and specular values
+float m_diff1[] = {0.54, 0.89, 0.63, 1.0};
+float m_spec1[] = {0.316228, 0.316228, 0.316228, 1.0};
+float shiny1 = 0.1;
+
+//obsidian
+// float m_amb1[] = {0.05375, 0.05, 0.06625, 1.0}; //setting the material for the ambient, diffuse and specular values
+// float m_diff1[] = {0.18275, 0.17, 0.22525, 1.0};
+// float m_spec1[] = {0.332741, 0.328634, 0.346435, 1.0};
+// float shiny1 = 0.3;
+
+float m_amb2[] = {0.0, 0.0, 0.0, 1.0}; //setting the material for the ambient, diffuse and specular values black plastic
+float m_diff2[] = {0.01, 0.01, 0.01, 1.0};
+float m_spec2[] = {0.50, 0.50, 0.50, 1.0};
+float shiny2 = 0.25;
+
+float m_amb3[] = {0.0, 0.0, 0.0, 1.0}; //setting the material for the ambient, diffuse and specular values white plastic
+float m_diff3[] = {0.55, 0.55, 0.55, 1.0};
+float m_spec3[] = {0.70, 0.70, 0.70, 1.0};
+float shiny3 = 0.25;
+
+float m_amb4[] = {0.25, 0.20725, 0.20725, 1.0}; //setting the material for the ambient, diffuse and specular values pearl for ball
+float m_diff4[] = {1.00, 0.829, 0.829, 1.0};
+float m_spec4[] = {0.296648, 0.296648, 0.296648, 1.0};
+float shiny4 = 0.088;
+
+float amb0[4] = {1,1,1,1};
 float diff0[4] = {1,1,1,1};
 float spec0[4] = {1,1,1,1};
-float m_amb[] = {0.33, 0.22, 0.03, 1.0}; 
-float m_diff[] = {0.78, 0.57, 0.11, 1.0}; 
-float m_spec[] = {0.99, 0.91, 0.81, 1.0}; 
-float shiny = 27.8;
+//float m_amb[] = {0.33, 0.22, 0.03, 1.0};
+//float m_diff[] = {0.78, 0.57, 0.11, 1.0};
+//float m_spec[] = {0.99, 0.91, 0.81, 1.0};
+
+//float m_amb[] = {0.33, 0.22, 0.03, 1.0}; 
+//float m_diff[] = {0.78, 0.57, 0.11, 1.0}; 
+//float m_spec[] = {0.99, 0.91, 0.81, 1.0}; 
+//float shiny = 27.8;
 
 float light1_pos[]= {-5, 5, 0,1}; //last num one is pofloat light
 float light2_pos[]= {5, 5, 0,1}; //last num one is pofloat light
@@ -148,27 +178,27 @@ void setStartingParameters() {
 
 void switchRound(int i) {
 	switch(i) {
-		case 1:
+		case 0:
 			basketPos.x = L->basketPosition1.x;
 			basketPos.y = L->basketPosition1.y;
 			basketPos.z = L->basketPosition1.z;
 		break;
-		case 2:
+		case 1:
 			basketPos.x = L->basketPosition2.x;
 			basketPos.y = L->basketPosition2.y;
 			basketPos.z = L->basketPosition2.z;
 		break;
-		case 3:
+		case 2:
 			basketPos.x = L->basketPosition3.x;
 			basketPos.y = L->basketPosition3.y;
 			basketPos.z = L->basketPosition3.z;
 		break;
-		case 4:
+		case 3:
 			basketPos.x = L->basketPosition4.x;
 			basketPos.y = L->basketPosition4.y;
 			basketPos.z = L->basketPosition4.z;
 		break;
-		case 5:
+		case 4:
 			basketPos.x = L->basketPosition5.x;
 			basketPos.y = L->basketPosition5.y;
 			basketPos.z = L->basketPosition5.z;
@@ -188,6 +218,14 @@ void drawBall(){
     glTranslatef(position.x,position.y,position.z);
     //printf("%f",position[1]);
     // glBindTexture(GL_TEXTURE_2D, textures[0]);
+    float m_amb2[] = {0.0, 0.0, 0.0, 1.0}; //setting the material for the ambient, diffuse and specular values black plastic
+    float m_diff2[] = {0.01, 0.01, 0.01, 1.0};
+    float m_spec2[] = {0.50, 0.50, 0.50, 1.0};
+    float shiny2 = 0.25;
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the terrain
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2);
     sphereOBJ = gluNewQuadric();
     gluQuadricDrawStyle(sphereOBJ, GLU_FILL);
     gluQuadricTexture(sphereOBJ, GL_TRUE);
@@ -482,6 +520,7 @@ void ballMotion(int value){
             position.y = intersectedFacePosition.y + velocity.y/60 + ballRadius;
             if (intersectedFacePosition.y == 0) {
             	bounced = true;
+                printf("bounce");
             }
 	    }
 
@@ -510,7 +549,7 @@ void ballMotion(int value){
                 if (position.y > basketPos.y && position.y < (basketPos.y + 0.5f) && !bounced) {
                     resetBall();
                     intscorecounter++;
-                    switchRound(intscorecounter % 5 + 1);
+                    switchRound(intscorecounter % 5);
                     if (intscorecounter != 0 && intscorecounter % 5 == 0) {
                     	currentLevel++;
                     	switchLevel(currentLevel);
@@ -535,6 +574,121 @@ void ballMotion(int value){
 
     glutTimerFunc(17,ballMotion,0);
 
+}
+int snowmanCounter = 0;
+bool movingRight = true;
+float pos[] = {0,1,0};
+float rot[] = {0,0,0};
+float headRot[] = {0,0,0};
+void DrawSnowman(float* pos, float* rot){
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the terrain
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec3);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
+    
+    glPushMatrix();
+    // printf("%i\n", counter);
+    if(movingRight == true){
+        if(snowmanCounter > -50){
+            glTranslatef(0.1*snowmanCounter,0,0);
+            snowmanCounter--;
+        } else if (snowmanCounter == -50){
+            glTranslatef(0.1*snowmanCounter,0,0);
+            snowmanCounter++;
+            movingRight = false;
+        }
+    }
+    
+    if(movingRight == false){
+        if(snowmanCounter < 50){
+            glTranslatef(0.1*snowmanCounter,0,0);
+            snowmanCounter++;
+            
+        } else if(snowmanCounter == 50){
+            glTranslatef(0.1*snowmanCounter,0,0);
+            snowmanCounter--;
+            movingRight = true;
+        }
+    }
+    
+    
+    glPushMatrix();
+    
+    glTranslatef(pos[0], pos[1], pos[2]);
+    // glRotatef(rot[1], 0, 1, 0);
+    glRotatef(180,0,1,0);
+    
+    //draw body
+    glColor3f(1,1,1);
+    glutSolidSphere(1, 16, 16);
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the terrain
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
+    
+    //draw buttons
+    glPushMatrix();
+    glTranslatef(0, 0.35, 0.9);
+    glColor3f(0, 0, 0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslatef(0, 0.15, 0.95);
+    glColor3f(0, 0, 0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslatef(0, -0.05, 0.95);
+    glColor3f(0, 0, 0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec3);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
+    
+    glPushMatrix();
+    //translate relative to body, and draw head
+    glTranslatef(0, 1.25, 0);
+    glRotatef(headRot[1], 0, 1, 0); //turn the head relative to the body
+    glColor3f(1,1,1);
+    glutSolidSphere(0.5, 16, 16);
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
+    
+    //translate and draw right eye
+    glPushMatrix();
+    glTranslatef(0.2, 0.15, 0.45);
+    glColor3f(0,0,0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    //translate and draw left eye
+    glPushMatrix();
+    glTranslatef(-0.2, 0.15, 0.45);
+    glColor3f(0,0,0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    //translate and draw nose
+    glPushMatrix();
+    glTranslatef(0, 0, 0.5);
+    glColor3f(1,0.4,0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    glPopMatrix();//body
+    glPopMatrix();//snowman
+    
+    glPopMatrix();
 }
 
 float input1, input2, input3;
@@ -691,7 +845,7 @@ void init(void)
     glColor3f(1,0,0);
     
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
+    //glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
     glLightfv(GL_LIGHT0, GL_AMBIENT, amb0);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diff0);
@@ -860,19 +1014,19 @@ void mouse(int btn, int state, int x, int y){
             averageZVelocity = dy/timeElapsed;
 
             if (ball == normal) {
-            	velocity.x += averageXVelocity*8;
-            	velocity.y = 30;
-            	velocity.z -= averageZVelocity*8;
+            	velocity.x += averageXVelocity*15;
+            	velocity.y = 2* (averageXVelocity+averageZVelocity)/2 + 20 ;
+            	velocity.z -= averageZVelocity*15;
             }
             else if (ball == bouncy) {
-            	 velocity.x += averageXVelocity*10;
+            	 velocity.x += averageXVelocity*15;
 	             velocity.y = 35;
-	             velocity.z -= averageZVelocity*10;
+	             velocity.z -= averageZVelocity*15;
             }
             else if (ball == rock) {
-            	velocity.x += averageXVelocity*3;
+            	velocity.x += averageXVelocity*15;
             	velocity.y = 25;
-            	velocity.z -= averageZVelocity*3;
+            	velocity.z -= averageZVelocity*15;
             }
 
             
@@ -912,7 +1066,7 @@ int main(int argc, char** argv)
     //glCullFace(GL_FRONT);
     //glEnable(GL_CULL_FACE);
     init();
-    initTexture();
+    //initTexture();
     callbackinit();
     setStartingParameters();
 

@@ -178,27 +178,27 @@ void setStartingParameters() {
 
 void switchRound(int i) {
 	switch(i) {
-		case 0:
+		case 1:
 			basketPos.x = L->basketPosition1.x;
 			basketPos.y = L->basketPosition1.y;
 			basketPos.z = L->basketPosition1.z;
 		break;
-		case 1:
+		case 2:
 			basketPos.x = L->basketPosition2.x;
 			basketPos.y = L->basketPosition2.y;
 			basketPos.z = L->basketPosition2.z;
 		break;
-		case 2:
+		case 3:
 			basketPos.x = L->basketPosition3.x;
 			basketPos.y = L->basketPosition3.y;
 			basketPos.z = L->basketPosition3.z;
 		break;
-		case 3:
+		case 4:
 			basketPos.x = L->basketPosition4.x;
 			basketPos.y = L->basketPosition4.y;
 			basketPos.z = L->basketPosition4.z;
 		break;
-		case 4:
+		case 5:
 			basketPos.x = L->basketPosition5.x;
 			basketPos.y = L->basketPosition5.y;
 			basketPos.z = L->basketPosition5.z;
@@ -218,14 +218,7 @@ void drawBall(){
     glTranslatef(position.x,position.y,position.z);
     //printf("%f",position[1]);
     // glBindTexture(GL_TEXTURE_2D, textures[0]);
-    float m_amb2[] = {0.0, 0.0, 0.0, 1.0}; //setting the material for the ambient, diffuse and specular values black plastic
-    float m_diff2[] = {0.01, 0.01, 0.01, 1.0};
-    float m_spec2[] = {0.50, 0.50, 0.50, 1.0};
-    float shiny2 = 0.25;
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the terrain
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2);
+
     sphereOBJ = gluNewQuadric();
     gluQuadricDrawStyle(sphereOBJ, GLU_FILL);
     gluQuadricTexture(sphereOBJ, GL_TRUE);
@@ -690,9 +683,24 @@ void DrawSnowman(float* pos, float* rot){
     
     glPopMatrix();
 }
+int text = 1;
 
+void ballTexture(){
+    switch(text){
+        case 2:
+            glBindTexture(GL_TEXTURE_2D, textures[0]);
+            break;
+            
+        case 3:
+            glBindTexture(GL_TEXTURE_2D, textures[1]);
+            break;
+            
+        case 4:
+            glBindTexture(GL_TEXTURE_2D, textures[2]);
+            break;
+    }
+}
 float input1, input2, input3;
-
 void keyboard(unsigned char key, int x, int y)
 {
 
@@ -777,12 +785,15 @@ void keyboard(unsigned char key, int x, int y)
         	cartesiontospherical();
         	spherical = true;
         	}
-        	break;
-          
+        case 'r':
+            resetBall();
             break;
+          
         case '1':
             if (textureToggle == true){
                 glEnable(GL_TEXTURE_2D);
+                // glBindTexture(GL_TEXTURE_2D, textures[0]);
+                
                 textureToggle = false;
             } else {
                 glDisable(GL_TEXTURE_2D);
@@ -791,23 +802,20 @@ void keyboard(unsigned char key, int x, int y)
             break;
             
         case '2':
-            glBindTexture(GL_TEXTURE_2D, textures[0]);
-            // drawBall();
+            text = 2;
+            // glBindTexture(GL_TEXTURE_2D, textures[0]);
             break;
             
         case '3':
-            glBindTexture(GL_TEXTURE_2D, textures[1]);
-            // drawBall();
+            text = 3;
+            // glBindTexture(GL_TEXTURE_2D, textures[1]);
+            
             break;
             
         case '4':
-            glBindTexture(GL_TEXTURE_2D, textures[2]);
-            // drawBall();
-            break;
+            text = 4;
+            // glBindTexture(GL_TEXTURE_2D, textures[2]);
             
-        case 'r':
-            case 'R':
-            resetBall();
             break;
     
 
@@ -863,7 +871,8 @@ void init(void)
     //Load the level
     L = new Level(1);
     currentLevel = 1;
-
+    printf("The camera controls in the cartesion co-ordinate system are WASD to move the camera forward, left, back, and right respectively and U and I to move the camera up and down.The camera controls in the spherical co-ordinate system are z and Z to increase and decrease the distance from the centre of the room respectively, x and X increase and decrease the azimuthal angle respectively, and c and C increase and decrease the polar angle respectively.The default camera mode is in the cartesion co-ordinate system and M alternates between the cartesion co-ordinate system and the spherical co-ordinate system.");
+    
 }
 
 
@@ -886,12 +895,17 @@ void display(void)
     glDisable(GL_TEXTURE_2D);
 
     L->drawLevel();
-    
+    DrawSnowman(pos, rot);
     drawBasket();
+    glDisable(GL_TEXTURE_2D);
+    drawBasket();
+    DrawSnowman(pos, rot);
     if(textureToggle == true){
         glEnable(GL_TEXTURE_2D);
     }
+    ballTexture();
     drawBall();
+
     glutSwapBuffers();
     glutPostRedisplay();
     
@@ -1066,7 +1080,7 @@ int main(int argc, char** argv)
     //glCullFace(GL_FRONT);
     //glEnable(GL_CULL_FACE);
     init();
-    //initTexture();
+    initTexture();
     callbackinit();
     setStartingParameters();
 

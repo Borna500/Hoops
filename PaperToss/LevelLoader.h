@@ -17,6 +17,7 @@
 using namespace std;
 
 enum objectType{plane, box};
+enum ballType{normal, rock, bouncy};
 
 class Face;
 class Object;
@@ -25,7 +26,7 @@ class Level;
 class Face {
 public:
 	Face();
-	Face(point3D min, point3D max);
+	Face(point3D min, point3D max, int normalflip);
 	point3D min;
 	point3D max;
 	point3D p0;
@@ -35,20 +36,20 @@ public:
 	vec3D normal;
 
 
-	bool testIntersection(float x, float y, float z);
+	bool testIntersection(float x, float y, float z, float ballRad);
 	void drawFace();
-	void calcNormal();
+	void calcNormal(int normalflip);
 	
 };
 
 class Object {
 public:
 	Object();
-	Object(objectType o, point3D min, point3D max);
+	Object(objectType o, point3D min, point3D max, int normalflip);
 	objectType t;
 	vector<Face*> *objectFaces;
 
-	int testIntersection(float x, float y, float z);
+	int testIntersection(float x, float y, float z, float ballRad);
 	void drawObject();
 	
 };
@@ -56,13 +57,34 @@ public:
 class Level {
 public:
 	Level();
-	int lvl; 	
-	vector<Object*> *levelObjects;
-	Object basket;
-	vec3D basketPosition;
+	Level(int l);
+	int lvl;
+	int score;
+	//Ball type, size, and bouncines
+	ballType ball;
+	float ballRadius;
+	//1 = full bounce, 0 = no bounce
+	float ballBounciness;
 
-	vector<int> testIntersection(float x, float y, float z);
+	//Starting position of ball
+	point3D startingPosition;
+
+	//Object list
+	vector<Object*> *levelObjects;
+
+	//Basket object, position, and radius
+	Object* basket;
+	vec3D basketPosition1;
+	vec3D basketPosition2;
+	vec3D basketPosition3;
+	vec3D basketPosition4;
+	vec3D basketPosition5;
+
+	float basketRadius;
+
+	vector<int> testIntersection(float x, float y, float z, float ballRad);
 	void drawLevel();
+	void updateBasket();
 	
 
 };

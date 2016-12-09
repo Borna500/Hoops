@@ -24,7 +24,7 @@ PROGRAM_NAME= PaperToss
 run: $(PROGRAM_NAME)
 	./$(PROGRAM_NAME)$(EXEEXT)
 
-$(PROGRAM_NAME): PaperToss.o math3D.o
+$(PROGRAM_NAME): PaperToss.o math3D.o LevelLoader.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 clean:

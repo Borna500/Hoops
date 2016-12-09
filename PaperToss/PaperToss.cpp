@@ -24,54 +24,53 @@
 #include <cmath>
 #include <string>
 #include "math3D.h"
-//#include "LevelLoader.h"
+#include "LevelLoader.h"
 #include <string>
 #include <sstream>
 
 using namespace std;
-//brass
-float m_amb1[] = {0.135, 0.2225, 0.1575, 1.0}; //setting the material for the ambient, diffuse and specular values
-float m_diff1[] = {0.54, 0.89, 0.63, 1.0};
-float m_spec1[] = {0.316228, 0.316228, 0.316228, 1.0};
-float shiny1 = 0.1;
 
-//obsidian
-// float m_amb1[] = {0.05375, 0.05, 0.06625, 1.0}; //setting the material for the ambient, diffuse and specular values
-// float m_diff1[] = {0.18275, 0.17, 0.22525, 1.0};
-// float m_spec1[] = {0.332741, 0.328634, 0.346435, 1.0};
-// float shiny1 = 0.3;
+//The level
+Level *L;
+int currentLevel;
 
-float m_amb2[] = {0.0, 0.0, 0.0, 1.0}; //setting the material for the ambient, diffuse and specular values black plastic
-float m_diff2[] = {0.01, 0.01, 0.01, 1.0};
-float m_spec2[] = {0.50, 0.50, 0.50, 1.0};
-float shiny2 = 0.25;
+//Ball variables
+point3D position;
+vec3D velocity;
+vec3D acceleration;
+float ballRadius;
+ballType ball;
+float ballBounciness;
 
-float m_amb3[] = {0.0, 0.0, 0.0, 1.0}; //setting the material for the ambient, diffuse and specular values white plastic
-float m_diff3[] = {0.55, 0.55, 0.55, 1.0};
-float m_spec3[] = {0.70, 0.70, 0.70, 1.0};
-float shiny3 = 0.25;
+//Basket variables
+float basketRadius;
+point3D basketPos;
 
-float m_amb4[] = {0.25, 0.20725, 0.20725, 1.0}; //setting the material for the ambient, diffuse and specular values pearl for ball
-float m_diff4[] = {1.00, 0.829, 0.829, 1.0};
-float m_spec4[] = {0.296648, 0.296648, 0.296648, 1.0};
-float shiny4 = 0.088;
-
-float amb0[4] = {1,1,1,1};
+int firstwindow;
+int secondwindow;
+//Lighting and materials
+float amb0[4] = {0.5,0.5,0.5,1};
 float diff0[4] = {1,1,1,1};
 float spec0[4] = {1,1,1,1};
 float m_amb[] = {0.33, 0.22, 0.03, 1.0}; 
 float m_diff[] = {0.78, 0.57, 0.11, 1.0}; 
 float m_spec[] = {0.99, 0.91, 0.81, 1.0}; 
 float shiny = 27.8;
-float yAngle = 0;
-float xAngle = 0;
+
+float light1_pos[]= {-5, 5, 0,1}; //last num one is pofloat light
+float light2_pos[]= {5, 5, 0,1}; //last num one is pofloat light
+
+//Score counter
 int intscorecounter = 0;
 string stringscorecounter = "";
 const char* counterstring;
-float boxDepth = 5;
+
+//State variables for ball
 bool selected = false;
 bool throwing = false;
 bool launched = false;
+
+//Ball throwing variables
 int startingMousepos[2];
 int finalMousepos[2];
 float startTime;
@@ -79,49 +78,24 @@ float endTime;
 float averageXVelocity;
 float averageZVelocity;
 
+//Wind speed
 float windspeed = 0;
-float position[] = {0,1,-4};
-float startingPos[] = {0,1,-4};
 
-float basketRadius = 1;
-float basketheight = 2;
-float basketPos[] = {0, basketheight, 4};
 
-float velocity[]  = {0,0,0};
-float acceleration[] = {windspeed,-100,0};
-
-float ballRotation[] = {0,0,0};
-/*** 
- EYE LOCATION
- ***/
-float eye[] = {0,0,0};
+//Eye Location
+float eye[] = {0,1,7};
 float lookat[] = {0,0,0};
-float light1_pos[]= {0,4,-4,1}; //last num one is pofloat light
-float light2_pos[]= {0,0,0,1}; //last num one is pofloat light
-
-
-float angle1 = 0.0f;
-/* display function - GLUT display callback function
- *      clears the screen, sets the camera position, draws the ground plane and movable box
- */
-int mapSize = 300;
-float heightMap[1000][1000];
-int maxX = mapSize;
-int maxZ = mapSize;
 
 float eyex = 0;
-float eyey = 3;
-float eyez = -7;
-
-float lookatx = 0;
-float lookaty = 0;
-
-float lookatz = 0;
-
+float eyey = 6;
+float eyez = 7;
 
 bool spherical = false; 
 
-float eyeradius = 10;
+
+// BORNA UPDATE FROM HERE
+
+float eyeradius = 7;
 float eyetheta = 4.71;
 float eyephi = 1.43;
 
@@ -133,6 +107,7 @@ float lookatphi = 0;
 // y = eyeradius  * cos(eyephi)
 // z = eyeradius * sin(eyetheta) * sin(eyephi)
 
+//Texture variables
 bool textureToggle = false;
 
 GLubyte *img_data1;
@@ -144,18 +119,80 @@ int width, height, ppmax;  //width, height, max variables for the file of the te
 
 GLUquadricObj *sphereOBJ = NULL;
 
+void setStartingParameters() {
+
+	ballRadius = L -> ballRadius;
+	ball = L -> ball;
+	ballBounciness = 1 - L -> ballBounciness;
+
+	eyez = L->startingPosition.z + 2;
+	eyey = L->startingPosition.y + 5;
+
+	basketRadius = L->basketRadius;
+	basketPos.x = L->basketPosition1.x;
+	basketPos.y = L->basketPosition1.y;
+	basketPos.z = L->basketPosition1.z;
+
+	position.x = L->startingPosition.x; 
+	position.y = L->startingPosition.y;
+	position.z = L->startingPosition.z;
+
+	velocity.x = 0.0f;
+	velocity.y = 0.0f;
+	velocity.z = 0.0f;
+
+	acceleration.x = windspeed;
+	acceleration.y = -100.0f;
+	acceleration.z = 0.0f;
+}
+
+void switchRound(int i) {
+	switch(i) {
+		case 1:
+			basketPos.x = L->basketPosition1.x;
+			basketPos.y = L->basketPosition1.y;
+			basketPos.z = L->basketPosition1.z;
+		break;
+		case 2:
+			basketPos.x = L->basketPosition2.x;
+			basketPos.y = L->basketPosition2.y;
+			basketPos.z = L->basketPosition2.z;
+		break;
+		case 3:
+			basketPos.x = L->basketPosition3.x;
+			basketPos.y = L->basketPosition3.y;
+			basketPos.z = L->basketPosition3.z;
+		break;
+		case 4:
+			basketPos.x = L->basketPosition4.x;
+			basketPos.y = L->basketPosition4.y;
+			basketPos.z = L->basketPosition4.z;
+		break;
+		case 5:
+			basketPos.x = L->basketPosition5.x;
+			basketPos.y = L->basketPosition5.y;
+			basketPos.z = L->basketPosition5.z;
+		break;
+	}
+}
+
+void switchLevel(int i) {
+	L = new Level(i);
+	setStartingParameters();
+}
+
 void drawBall(){
+
+    
     glPushMatrix();
-    //everytime the ball travels one circumference it will rotate one revolution
-    glTranslatef(position[0],position[1],position[2]);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb4); //putting material onto the terrain
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff4);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec4);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny4);
+    glTranslatef(position.x,position.y,position.z);
+    //printf("%f",position[1]);
+    // glBindTexture(GL_TEXTURE_2D, textures[0]);
     sphereOBJ = gluNewQuadric();
     gluQuadricDrawStyle(sphereOBJ, GLU_FILL);
     gluQuadricTexture(sphereOBJ, GL_TRUE);
     gluQuadricNormals(sphereOBJ, GLU_SMOOTH);
+    
     gluSphere(sphereOBJ, 1, 100, 100);
     glPopMatrix();
 }
@@ -298,6 +335,13 @@ void cartesiontospherical(){
 
 
 
+// void updatelookatposition(){
+    
+//     lookat[0] = lookatradius * sin(lookatphi) * cos(lookattheta);
+//     lookat[1] = lookatradius  * cos(lookatphi);
+//     lookat[2] = lookatradius * sin(lookattheta) * sin(lookatphi);
+// }
+
 // BORNA UPDATE TO HERE
 void textprinter(int x, int y, char* text)
 {
@@ -308,29 +352,20 @@ void textprinter(int x, int y, char* text)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
+    //glDisable(GL_DEPTH_TEST);
     glRasterPos2i(x,y);
-    
-    char* c;  //character iterator  (ptr)
+
+    glColor3f(0,0,1);
+    char* c;  //character iterator (ptr)
     for(c = text; *c != '\0'; c++) //stop when we hit null character
     {
-
         glutStrokeCharacter(GLUT_STROKE_ROMAN, *c); //print one char
     }
-    
-//    glRasterPos2i(x,y);
-//    
-//      //character iterator (ptr)
-//    for(c = text2; *c != '\0'; c++) //stop when we hit null character
-//    {
-//        
-//        glutStrokeCharacter(GLUT_STROKE_ROMAN, *c); //print one char
-//    }
-    
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
-    
     glPopMatrix();
+//    glEnable(GL_DEPTH_TEST);
     
 }
 void changetostring(int integer){
@@ -344,208 +379,13 @@ void changetostring(int integer){
     counterstring = stringscorecounter.c_str();;
     
 }
-void drawFloor(){
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb1); //putting material onto the terrain
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff1);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec1);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny1*128);
-    //floor
-    glPushMatrix();
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glColor3f(1, 0, 0);
-    
-        glBegin(GL_QUADS);
-            glNormal3f(0, 1, 0);
-            glVertex3f(5, 0, 5);
-            glVertex3f(5, 0, -5);
-            glVertex3f(-5, 0, -5);
-            glVertex3f(-5, 0, 5);
-        glEnd();
-    glPopMatrix();
-    
-    //ceiling
-    glPushMatrix();
-        glTranslatef(0, 10, 0);
-        glBegin(GL_QUADS);
-            glNormal3f(0, -1, 0);
-            glVertex3f(5, 0, 5);
-            glVertex3f(5, 0, -5);
-            glVertex3f(-5, 0, -5);
-            glVertex3f(-5, 0, 5);
-        glEnd();
-    glPopMatrix();
-    
-    //right wall
-    glPushMatrix();
-        glTranslatef(-5, 5, 0);
-        glRotatef(90, 0, 0, 1);
-        glBegin(GL_QUADS);
-            glNormal3f(1, 0, 0);
-            glVertex3f(5, 0, 5);
-            glVertex3f(5, 0, -5);
-            glVertex3f(-5, 0, -5);
-            glVertex3f(-5, 0, 5);
-            glEnd();
-    glPopMatrix();
-    
-    //left wall
-    glPushMatrix();
-        glTranslatef(5, 5, 0);
-        glRotatef(90, 0, 0, 1);
-        glBegin(GL_QUADS);
-            glNormal3f(1, 0, 0);
-            glVertex3f(5, 0, 5);
-            glVertex3f(5, 0, -5);
-            glVertex3f(-5, 0, -5);
-            glVertex3f(-5, 0, 5);
-        glEnd();
-    glPopMatrix();
-    
-    //back wall
-    glPushMatrix();
-        glTranslatef(0, 5, 5);
-        glRotatef(90, 1, 0, 0);
-        glBegin(GL_QUADS);
-            glNormal3f(0, 0, -1);
-            glVertex3f(5, 0, 5);
-            glVertex3f(5, 0, -5);
-            glVertex3f(-5, 0, -5);
-            glVertex3f(-5, 0, 5);
-        glEnd();
-    glPopMatrix();
-}
 
-bool bounced = false;
-
-void resetBall() {
-    windspeed = -50 + rand()%100;
-    position[0] = startingPos[0]; position[1] = startingPos[1]; position[2] = startingPos[2];
-    velocity[0] = 0.0f; velocity[1] = 0.0f; velocity[2] = 0.0f;
-    acceleration[0] = windspeed; acceleration[1] = -100.0f; acceleration[2] = 0.0f;
-    launched = false;
-    bounced = false;
-}
-int snowmanCounter = 0;
-bool movingRight = true;
-float pos[] = {0,1,0};
-float rot[] = {0,0,0};
-float headRot[] = {0,0,0};
-void DrawSnowman(float* pos, float* rot){
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the terrain
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec3);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
-    
-    glPushMatrix();
-    // printf("%i\n", counter);
-    if(movingRight == true){
-        if(snowmanCounter > -50){
-            glTranslatef(0.1*snowmanCounter,0,0);
-            snowmanCounter--;
-        } else if (snowmanCounter == -50){
-            glTranslatef(0.1*snowmanCounter,0,0);
-            snowmanCounter++;
-            movingRight = false;
-        }
-    }
-
-    if(movingRight == false){
-        if(snowmanCounter < 50){
-            glTranslatef(0.1*snowmanCounter,0,0);
-            snowmanCounter++;
-            
-        } else if(snowmanCounter == 50){
-            glTranslatef(0.1*snowmanCounter,0,0);
-            snowmanCounter--;
-            movingRight = true;
-        }
-    }
-
-    
-    glPushMatrix();
-    
-    glTranslatef(pos[0], pos[1], pos[2]);
-    // glRotatef(rot[1], 0, 1, 0);
-    glRotatef(180,0,1,0);
-    
-    //draw body
-    glColor3f(1,1,1);
-    glutSolidSphere(1, 16, 16);
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the terrain
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
-    
-    //draw buttons
-    glPushMatrix();
-    glTranslatef(0, 0.35, 0.9);
-    glColor3f(0, 0, 0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    glPushMatrix();
-    glTranslatef(0, 0.15, 0.95);
-    glColor3f(0, 0, 0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    glPushMatrix();
-    glTranslatef(0, -0.05, 0.95);
-    glColor3f(0, 0, 0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec3);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
-    
-    glPushMatrix();
-    //translate relative to body, and draw head
-    glTranslatef(0, 1.25, 0);
-    glRotatef(headRot[1], 0, 1, 0); //turn the head relative to the body
-    glColor3f(1,1,1);
-    glutSolidSphere(0.5, 16, 16);
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
-    
-    //translate and draw right eye
-    glPushMatrix();
-    glTranslatef(0.2, 0.15, 0.45);
-    glColor3f(0,0,0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    //translate and draw left eye
-    glPushMatrix();
-    glTranslatef(-0.2, 0.15, 0.45);
-    glColor3f(0,0,0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    //translate and draw nose
-    glPushMatrix();
-    glTranslatef(0, 0, 0.5);
-    glColor3f(1,0.4,0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    glPopMatrix();//body
-    glPopMatrix();//snowman
-    
-    glPopMatrix();
-}
 void drawBasket() {
     glColor3f(1,0,0);
     glPushMatrix();
-        glTranslatef(basketPos[0], basketPos[1], basketPos[2]);
+        glTranslatef(basketPos.x, basketPos.y, basketPos.z);
         glPushMatrix();
-            glTranslatef(0, 0.8, 1);
+            glTranslatef(0, 0.8, -1);
             glScalef(2.5, 2.5, 0.1);
             glutSolidCube(1);
         glPopMatrix();
@@ -553,18 +393,39 @@ void drawBasket() {
         glutSolidTorus(basketRadius / 5, basketRadius, 100, 100);
     glPopMatrix();
 }
+
 bool pendingStop = false;
 float groundstartTime;
 float currentTime;
+bool bounced = false;
+
 void startTimer(){
     groundstartTime=(GLfloat)glutGet(GLUT_ELAPSED_TIME);
 }
-float terminalWind = 50;
+
+vector<int> intersectionIndex;
+vec3D intersectedFaceNormal;
+point3D intersectedFacePosition;
+int oInd;
+int fInd;
+
+
+
+void resetBall() {
+    position = L->startingPosition;
+    velocity.x = 0.0f; velocity.y = 0.0f; velocity.z = 0.0f;
+    acceleration.x = windspeed; acceleration.y = -100.0f; acceleration.z = 0.0f;
+    launched = false;
+    pendingStop = false;
+    bounced = false;
+}
+
 
 void ballMotion(int value){
-    //printf("%f\n",position[1]);
+
+	//Ball resets after certain amount of time 
     if(bounced){
-       
+
         if (pendingStop == false){
             pendingStop = true;
             startTimer();           //starts a 3 second timer
@@ -572,74 +433,100 @@ void ballMotion(int value){
         else{
             currentTime = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
            // printf("%f\n", currentTime-groundstartTime);
-            if ((currentTime - groundstartTime) > 5000){
-                printf("times up\n");
-                
-                pendingStop = false;
-                launched = false;
+            if (currentTime - groundstartTime > 5000){
                 resetBall();
             }
         }
     }
     if (launched == true) {
-        if(abs(velocity[0]) < terminalWind){
-            velocity[0] += windspeed/60;
-        }
-	    velocity[0] += acceleration[0]/60;
-	    velocity[1] += acceleration[1]/60;
-	    velocity[2] += acceleration[2]/60;
-	    position[0] += velocity[0]/60;
-	    position[1] += velocity[1]/60;
-	    position[2] += velocity[2]/60;
+    	//Increment velocity based on acceleration
+	    velocity.x = velocity.x + acceleration.x/60;
+	    velocity.y = velocity.y + acceleration.y/60;
+	    velocity.z = velocity.z + acceleration.z/60;
 
+	    //Increment position based on velocity
+	    position.x += velocity.x/60;
+	    position.y += velocity.y/60;
+	    position.z += velocity.z/60;
 
-    
-        if (position[2] > 5 ){
-            velocity[2] = -1*(velocity[2] - 0.5*velocity[2]);
-            position[2] = 5.0 + velocity[2]/60;
-            printf("out of z pos wall");
-        }
-        else if (position[2] < -5 ){
-            velocity[2] = -1*(velocity[2] - 0.5*velocity[2]);
-            position[2] = -5.0 + velocity[2]/60;
-            printf("out of z neg wall");
-        }
-        if (position[0] < -5){
-            velocity[0] = -1*(velocity[0] - 0.5*velocity[0]);
-            position[0] = -5.0 + velocity[0]/60;
-            printf("out of x neg wall");
-        }
-        else if (position[0] > 5){
-            
-            velocity[0] = -1*(velocity[0] - 0.5*velocity[0]);
-            position[0] = 5.0 + velocity[0]/60;
-            printf("out of x pos wall");
-        }
-        if (position[1] < 1){
-            intscorecounter = 0;
-            velocity[1] = -1*(velocity[1] - 0.5*velocity[1]);       //lose half magnitude and reverse direction
-            position[1] = 1.0 + velocity[1]/60;
-            bounced = true;
-        }
+	    //Reset variables
+	    intersectedFaceNormal.x = 0; intersectedFaceNormal.y = 0; intersectedFaceNormal.z = 0;
+	    intersectedFacePosition.x = 0; intersectedFacePosition.y = 0; intersectedFacePosition.z = 0;
+
+	    //Test if balls position intersects with any faces of objects in the level
+	    intersectionIndex = L->testIntersection(position.x, position.y, position.z, ballRadius);
+	    if (intersectionIndex.size() > 0) {
+	    	if (intersectionIndex.at(0) != -1) {
+	    		oInd = intersectionIndex.at(0);
+	    		fInd = intersectionIndex.at(1);
+	    		intersectedFaceNormal = L->levelObjects->at(oInd)->objectFaces->at(fInd)->normal;
+	    		intersectedFacePosition = L->levelObjects->at(oInd)->objectFaces->at(fInd)->min;
+	    	}
+	    }
+
+	    //Intersecting with left object face
+	    if (intersectedFaceNormal.x == 1) {
+	    	velocity.x = -1 * (velocity.x - ballBounciness*velocity.x);
+            position.x = intersectedFacePosition.x + velocity.x/60 + ballRadius;
+	    }
+
+	    //Intersecting with right object face
+	   	else if (intersectedFaceNormal.x == -1) {
+	    	velocity.x = -1 * (velocity.x - ballBounciness *velocity.x);
+            position.x = intersectedFacePosition.x + velocity.x/60 - ballRadius;
+	    }
+
+	    //Intersecting with bottom object face
+	    else if (intersectedFaceNormal.y == 1) {
+	    	velocity.y = -1 * (velocity.y - ballBounciness *velocity.y);
+            position.y = intersectedFacePosition.y + velocity.y/60 + ballRadius;
+            if (intersectedFacePosition.y == 0) {
+            	bounced = true;
+            }
+	    }
+
+	    //Intersecting with top object face
+	    else if (intersectedFaceNormal.y == -1) {
+	    	velocity.y = -1 * (velocity.y - ballBounciness * velocity.y);
+            position.y = intersectedFacePosition.y + velocity.y/60 - ballRadius;
+
+	    }
+
+	    //Intersecting with front object face
+	    else if (intersectedFaceNormal.z == 1) {
+            velocity.z = -1 * (velocity.z - ballBounciness * velocity.z);
+            position.z = intersectedFacePosition.z + velocity.z/60 + ballRadius;
+	    }
+
+	    //Intersecting with back object face
+	    else if (intersectedFaceNormal.z == -1) {
+            velocity.z = -1 * (velocity.z - ballBounciness * velocity.z);
+            position.z = intersectedFacePosition.z + velocity.z/60 - ballRadius;
+	    }
+
         //Intersection with inside of basket (scoring)
-        if ((position[0] > (basketPos[0] - basketRadius)) && (position[0] < (basketPos[0] + basketRadius))) {
-            if ((position[2] > (basketPos[2] - basketRadius)) && (position[2] < (basketPos[2] + basketRadius))) {
-                if (position[1] > basketPos[1] && position[1] < (basketPos[1] + 0.5f) && !bounced) {
-                    printf("scored\n");
+        if ((position.x > (basketPos.x - basketRadius)) && (position.x < (basketPos.x + basketRadius))) {
+            if ((position.z > (basketPos.z - basketRadius)) && (position.z < (basketPos.z + basketRadius))) {
+                if (position.y > basketPos.y && position.y < (basketPos.y + 0.5f) && !bounced) {
                     resetBall();
                     intscorecounter++;
+                    switchRound(intscorecounter % 5 + 1);
+                    if (intscorecounter != 0 && intscorecounter % 5 == 0) {
+                    	currentLevel++;
+                    	switchLevel(currentLevel);
+                    }
                 }
             }
         }
         //Intersection with outside of basket (rim shot)
-         if ((position[0] > (basketPos[0] - basketRadius)) && (position[0] < (basketPos[0] + basketRadius))) {
-             if ((position[2] > (basketPos[2] - basketRadius)) && (position[2] < (basketPos[2] + basketRadius))) {
-                if (position[1] < basketPos[1]  && bounced) {
-                     velocity[0] = -1*(velocity[0] - 0.5*velocity[0]);       //lose half magnitude and reverse direction
-                     position[0] = position[0] + velocity[0]/60;
+         if ((position.x > (basketPos.x - basketRadius)) && (position.x < (basketPos.x + basketRadius))) {
+             if ((position.z > (basketPos.z - basketRadius)) && (position.z < (basketPos.z + basketRadius))) {
+                if (position.y < basketPos.y  && bounced) {
+                     velocity.x = -1*(velocity.x - ballBounciness * velocity.x);       //lose half magnitude and reverse direction
+                     position.x = position.x + velocity.x/60;
 
-                     velocity[2] = -1*(velocity[2] - 0.5*velocity[2]);       //lose half magnitude and reverse direction
-                     position[2] = position[2] + velocity[2]/60;
+                     velocity.z = -1*(velocity.z - ballBounciness *velocity.z);       //lose half magnitude and reverse direction
+                     position.x = position.x + velocity.x/60;
                 }
             }
         }
@@ -651,7 +538,7 @@ void ballMotion(int value){
 }
 
 float input1, input2, input3;
-int text = 2;
+
 void keyboard(unsigned char key, int x, int y)
 {
 
@@ -665,46 +552,22 @@ void keyboard(unsigned char key, int x, int y)
             
 		case 'W':
         case 'w':
-            if (eyez < 0){
-                eyez +=0.1;
-
-            }
-            else{
-                eyez -=0.1;
-            }
+      		eyez +=0.1;
         	break;
 
         case 'a':
         case 'A':
-            if (eyez < 0){
-                eyex +=0.1;
-                
-            }
-            else{
-                eyex -=0.1;
-            }
+          	eyex +=0.1;
         	break;
 
     	case 'S':
         case 's':
-            if (eyez < 0){
-                eyez -=0.1;
-                
-            }
-            else{
-                eyez +=0.1;
-            }
+        	eyez -=0.1;
         	break;
 
         case 'D':
         case 'd':
-            if (eyez < 0){
-                eyex -=0.1;
-                
-            }
-            else{
-                eyex +=0.1;
-            }
+          	eyex -=0.1;
         	break;
 
         case 'U':
@@ -766,8 +629,6 @@ void keyboard(unsigned char key, int x, int y)
         case '1':
             if (textureToggle == true){
                 glEnable(GL_TEXTURE_2D);
-                // glBindTexture(GL_TEXTURE_2D, textures[0]);
-                
                 textureToggle = false;
             } else {
                 glDisable(GL_TEXTURE_2D);
@@ -776,20 +637,18 @@ void keyboard(unsigned char key, int x, int y)
             break;
             
         case '2':
-            text = 2;
-            // glBindTexture(GL_TEXTURE_2D, textures[0]);
+            glBindTexture(GL_TEXTURE_2D, textures[0]);
+            // drawBall();
             break;
             
         case '3':
-            text = 3;
-            // glBindTexture(GL_TEXTURE_2D, textures[1]);
-            
+            glBindTexture(GL_TEXTURE_2D, textures[1]);
+            // drawBall();
             break;
             
         case '4':
-            text = 4;
-            // glBindTexture(GL_TEXTURE_2D, textures[2]);
-            
+            glBindTexture(GL_TEXTURE_2D, textures[2]);
+            // drawBall();
             break;
             
         case 'r':
@@ -827,14 +686,13 @@ void special(int key, int x, int y)
     glutPostRedisplay();
 }
 
-void init(void){
-    resetBall();
-    glClearColor(0, 0, 0, 0);
+void init(void)
+{   glClearColor(0, 0, 0, 0);
     glColor3f(1,0,0);
     
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
-    //glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT1);
     glLightfv(GL_LIGHT0, GL_AMBIENT, amb0);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diff0);
     glLightfv(GL_LIGHT0, GL_SPECULAR, spec0);
@@ -842,31 +700,19 @@ void init(void){
     glLightfv(GL_LIGHT1, GL_AMBIENT, amb0);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, diff0);
     glLightfv(GL_LIGHT1, GL_SPECULAR, spec0);
-
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glFrustum(-10,10,-10,10,0,1000);
     gluPerspective(90, 1, 1, 1000);
 
+    //Load the level
+    L = new Level(1);
+    currentLevel = 1;
+
 }
 
 
-void ballTexture(){
-    switch(text){
-        case 2:
-            glBindTexture(GL_TEXTURE_2D, textures[0]);
-            break;
-            
-        case 3:
-            glBindTexture(GL_TEXTURE_2D, textures[1]);
-            break;
-            
-        case 4:
-            glBindTexture(GL_TEXTURE_2D, textures[2]);
-            break;
-    }
-}
 
 void display(void)
 {
@@ -877,21 +723,20 @@ void display(void)
     glLoadIdentity();
     changetostring(intscorecounter);
     glDisable(GL_LIGHTING);
-    glColor3f(1, 0, 0);
     textprinter(750,780, (char*)counterstring);
     glEnable(GL_LIGHTING);
     gluLookAt(eye[0],eye[1],eye[2], lookat[0],lookat[1],lookat[2], 0, 1, 0);
     glLightfv(GL_LIGHT0, GL_POSITION, light1_pos);
     glLightfv(GL_LIGHT1, GL_POSITION, light2_pos);
     
-    drawFloor();
     glDisable(GL_TEXTURE_2D);
+
+    L->drawLevel();
+    
     drawBasket();
-    DrawSnowman(pos, rot);
     if(textureToggle == true){
         glEnable(GL_TEXTURE_2D);
     }
-    ballTexture();
     drawBall();
     glutSwapBuffers();
     glutPostRedisplay();
@@ -903,7 +748,7 @@ void display(void)
 bool calcIntersection(vec3D r0, vec3D rd) {
     //Max and min of bounding box for ball
     vec3D min, max;
-    min.x = position[0] - 0.5f; min.y = position[1] - 0.5f; min.z = position[2] - 0.5f;
+    min.x = position.x - 0.5f; min.y = position.y - 0.5f; min.z = position.z - 0.5f;
     max.x = min.x + 1.0f; max.y = min.y + 1.0f; max.z = min.z + 1.0f;
     
     //Calculate points on the front face of the ball
@@ -995,6 +840,7 @@ bool rayCast(float x, float y) {
 
 
 void mouse(int btn, int state, int x, int y){
+    
     if (btn == GLUT_LEFT_BUTTON && launched == false){
         if (state == GLUT_DOWN){
             startingMousepos[0] = x, startingMousepos[1] = y;       //store the starting mouse position
@@ -1008,18 +854,31 @@ void mouse(int btn, int state, int x, int y){
             
             float timeElapsed = endTime - startTime;
             float dy = -(finalMousepos[1] - startingMousepos[1]);
-            float dx = -(finalMousepos[0] - startingMousepos[0]);
+            float dx = (finalMousepos[0] - startingMousepos[0]);
             
             averageXVelocity = dx/timeElapsed;
             averageZVelocity = dy/timeElapsed;
-            velocity[0] += averageXVelocity*5;
-            velocity[1] = 20;
-            velocity[2] += averageZVelocity*5;
+
+            if (ball == normal) {
+            	velocity.x += averageXVelocity*8;
+            	velocity.y = 30;
+            	velocity.z -= averageZVelocity*8;
+            }
+            else if (ball == bouncy) {
+            	 velocity.x += averageXVelocity*10;
+	             velocity.y = 35;
+	             velocity.z -= averageZVelocity*10;
+            }
+            else if (ball == rock) {
+            	velocity.x += averageXVelocity*3;
+            	velocity.y = 25;
+            	velocity.z -= averageZVelocity*3;
+            }
+
             
-            printf("%f\n", windspeed);
+            printf("%f,%f\n", averageXVelocity,averageZVelocity);
             launched = true;
             bounced = false;
-            
         }
     }
     
@@ -1040,7 +899,7 @@ int main(int argc, char** argv)
     glutInitWindowSize(800, 800);
     glutInitWindowPosition(100, 100);
 
-    glutCreateWindow("BallToss");  //creates the window
+    firstwindow = glutCreateWindow("BallToss");  //creates the window
     
     
     glutDisplayFunc(display);   //registers "display" as the display callback function
@@ -1049,12 +908,13 @@ int main(int argc, char** argv)
     glutSpecialFunc(special);
     
     glEnable(GL_DEPTH_TEST);
-//glFrontFace((GL_CCW));
-//glCullFace(GL_BACK);
-//glEnable(GL_CULL_FACE);
+    //glFrontFace((GL_CCW));
+    //glCullFace(GL_FRONT);
+    //glEnable(GL_CULL_FACE);
     init();
     initTexture();
     callbackinit();
+    setStartingParameters();
 
     glutMainLoop();             //starts the event loop
 

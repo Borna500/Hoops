@@ -308,15 +308,23 @@ void textprinter(int x, int y, char* text)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    //glScalef(2,2,2);
     glRasterPos2i(x,y);
     
-    char* c;  //character iterator (ptr)
+    char* c;  //character iterator  (ptr)
     for(c = text; *c != '\0'; c++) //stop when we hit null character
     {
 
-        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *c); //print one char
+        glutStrokeCharacter(GLUT_STROKE_ROMAN, *c); //print one char
     }
+    
+//    glRasterPos2i(x,y);
+//    
+//      //character iterator (ptr)
+//    for(c = text2; *c != '\0'; c++) //stop when we hit null character
+//    {
+//        
+//        glutStrokeCharacter(GLUT_STROKE_ROMAN, *c); //print one char
+//    }
     
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -359,7 +367,7 @@ void drawFloor(){
     glPushMatrix();
         glTranslatef(0, 10, 0);
         glBegin(GL_QUADS);
-            glNormal3f(0, 1, 0);
+            glNormal3f(0, -1, 0);
             glVertex3f(5, 0, 5);
             glVertex3f(5, 0, -5);
             glVertex3f(-5, 0, -5);
@@ -604,7 +612,7 @@ void ballMotion(int value){
             printf("out of x pos wall");
         }
         if (position[1] < 1){
-            //printf("%f",position[1]);
+            intscorecounter = 0;
             velocity[1] = -1*(velocity[1] - 0.5*velocity[1]);       //lose half magnitude and reverse direction
             position[1] = 1.0 + velocity[1]/60;
             bounced = true;
@@ -1007,6 +1015,7 @@ void mouse(int btn, int state, int x, int y){
            // printf("%f,%f\n", averageXVelocity,averageZVelocity);
             launched = true;
             bounced = false;
+            
         }
     }
     
@@ -1036,6 +1045,9 @@ int main(int argc, char** argv)
     glutSpecialFunc(special);
     
     glEnable(GL_DEPTH_TEST);
+//glFrontFace((GL_CCW));
+//glCullFace(GL_BACK);
+//glEnable(GL_CULL_FACE);
     init();
     initTexture();
     callbackinit();

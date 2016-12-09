@@ -218,6 +218,10 @@ void drawBall(){
     glTranslatef(position.x,position.y,position.z);
     //printf("%f",position[1]);
     // glBindTexture(GL_TEXTURE_2D, textures[0]);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  amb0); //putting material onto the terrain
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  diff0);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  spec0);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  128);
 
     sphereOBJ = gluNewQuadric();
     gluQuadricDrawStyle(sphereOBJ, GLU_FILL);
@@ -580,6 +584,7 @@ void DrawSnowman(float* pos, float* rot){
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
     
     glPushMatrix();
+    int level = L->lvl * 10;
     // printf("%i\n", counter);
     if(movingRight == true){
         if(snowmanCounter > -50){

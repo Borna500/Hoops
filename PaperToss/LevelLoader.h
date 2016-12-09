@@ -16,24 +16,59 @@
 
 using namespace std;
 
-class Level;
-class Object;
+enum objectType{plane, box};
+
 class Face;
+class Object;
+class Level;
 
-class Level {
-	Level(int i);
-	vector<Object*> *levelobjects;
+class Face {
+public:
+	Face();
+	Face(point3D min, point3D max);
+	point3D min;
+	point3D max;
+	point3D p0;
+	point3D p1; 
+	point3D p2;
+	point3D p3;
+	vec3D normal;
 
+
+	bool testIntersection(float x, float y, float z);
+	void drawFace();
+	void calcNormal();
+	
 };
 
 class Object {
+public:
 	Object();
-	vector<Face*> *faces;
+	Object(objectType o, point3D min, point3D max);
+	objectType t;
+	vector<Face*> *objectFaces;
+
+	int testIntersection(float x, float y, float z);
+	void drawObject();
+	
 };
 
-class Face {
-	Face();
-	vector<vec3D*> *points;
+class Level {
+public:
+	Level();
+	int lvl; 	
+	vector<Object*> *levelObjects;
+	Object basket;
+	vec3D basketPosition;
+
+	vector<int> testIntersection(float x, float y, float z);
+	void drawLevel();
+	
+
 };
+
+
+
+
 
 #endif

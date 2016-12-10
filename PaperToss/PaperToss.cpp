@@ -517,7 +517,6 @@ void ballMotion(int value){
             position.y = intersectedFacePosition.y + velocity.y/60 + ballRadius;
             if (intersectedFacePosition.y == 0) {
             	bounced = true;
-                printf("bounce");
             }
 	    }
 
@@ -915,105 +914,160 @@ void display(void)
     
 }
 
+int calcInter(int x, int y) {
+    GLdouble R0[3], R1[3], Rd[3];
+    GLdouble modelMat[16];
+    GLdouble projMat[16];
+    GLint viewMat[4];
+    
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelMat);
+    glGetDoublev(GL_PROJECTION_MATRIX, projMat);
+    glGetIntegerv(GL_VIEWPORT, viewMat);
+    
+    gluUnProject(x, y, 0.0, modelMat, projMat, viewMat, &R0[0], &R0[1], &R0[2]);
+    gluUnProject(x, y, 1.0, modelMat, projMat, viewMat, &R1[0], &R1[1], &R1[2]);
+    
+    Rd[0] = R1[0] - R0[0];
+    Rd[1] = R1[1] - R0[1];
+    Rd[2] = R1[2] - R0[2];
+    
+    GLdouble m = sqrt(Rd[0]*Rd[0] + Rd[1]*Rd[1] + Rd[2]*Rd[2]);
+    Rd[0] /= m;
+    Rd[1] /= m;
+    Rd[2] /= m;
+    double defOffset = 2.0; //the distance from the center of the ball to its outer bounding box.
 
 
-bool calcIntersection(vec3D r0, vec3D rd) {
-    //Max and min of bounding box for ball
-    vec3D min, max;
-    min.x = position.x - 0.5f; min.y = position.y - 0.5f; min.z = position.z - 0.5f;
-    max.x = min.x + 1.0f; max.y = min.y + 1.0f; max.z = min.z + 1.0f;
-    
-    //Calculate points on the front face of the ball
-    point3D p0, p1, p2, p3;
-    p0.x = min.x; p0.y = min.y; p0.z = max.z;
-    p1.x = max.x; p1.y = min.y; p1.z = max.z;
-    p2.x = max.x; p2.y = max.y; p2.z = max.z;
-    p3.x = min.x; p3.y = max.y; p3.z = max.z;
-    
-    //Calculate the equation of the plane intersecting with the face
-    float a, b, c, d;
-    vec3D t1, t2, norm;
-    
-    t1 = t1.createVector(p1, p0);
-    t2 = t2.createVector(p2, p0);
-    
-    norm = t1.crossProduct(t2);
-    
-    norm = norm.normalize();
-    
-    d = -((norm.x * p0.x) + (norm.y * p0.y) + (norm.z * p0.z));
-    a = norm.x; b = norm.y; c = norm.z;
-    
-    //Test for intersection of the ray and the plane
-    float t, dot0, dotD;
-    vec3D is;
-    
-    dot0 = (a * r0.x) + (b * r0.y) + (c * r0.z);
-    dotD = (a * rd.x) + (b * rd.y) + (c * r0.z);
-    
-    if (dot0 == 0) return false;
-    
-    t = -((dot0 + d) / dotD);
-    
-    is = r0 + rd.vectorMultiply(t);
-    
-    if ((is.x > p0.x) && (is.x < p1.x) && (is.y > p0.y) && (is.y < p2.y)) {
-        return true;
-    } else {
-        return false;
-    }
-    
-    
+        
+        double t = (((double)position.z) - R0[2])/Rd[2];
+        
+        
+        double pt[3];
+        pt[0] = R0[0] + t * Rd[0];
+        pt[1] = R0[1] + t * Rd[1];
+        pt[2] = position.z;
+        
+        if ( pt[0] > position.x - (defOffset)  //if point is within bounding box
+            && pt[0] < position.x + (defOffset)
+            && pt[1] > position.y - (defOffset)
+            && pt[1] < position.y + (defOffset)
+            && pt[2] > position.z - (defOffset)
+            && pt[2] < position.z + (defOffset)) {
+            printf("true\n");
+            return true;
+        }
+        else{
+            printf("false\n");
+            return false;
+        }
+        
+        
     
 }
 
-bool rayCast(float x, float y) {
-    GLint viewport[4];          //declaring arrays and variables
-    GLdouble modelview[16];
-    GLdouble projection[16];
-    float winX;
-    float winY;
-    GLdouble pos1X, pos1Y, pos1Z;
-    GLdouble pos2X, pos2Y, pos2Z;
-    GLdouble dirX, dirY, dirZ;
-    vec3D r0, rd;
-    
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-    
-    glGetDoublev(GL_PROJECTION_MATRIX, projection);
-    
-    //Flip the y coordinate to have the proper opengl screen coords
-    winX = x;
-    winY = (float)viewport[3] - y;
-    
-    //Unproject the coordinates from screen to world coordinates on the near clipping plane
-    gluUnProject(winX, winY, 0.0, modelview, projection, viewport, &pos1X, &pos1Y, &pos1Z);
-    
-    //Unproject the coordinates from screen to world coordinates on the far clipping plane
-    gluUnProject(winX, winY, 1.0, modelview, projection, viewport, &pos2X, &pos2Y, &pos2Z);
-    
-    //Calculate a normalized ray between the far and near clipping planes
-    dirX = pos2X - pos1X;
-    dirY = pos2Y - pos1Y;
-    dirZ = pos2Z - pos1Z;
-    
-    r0.x = pos1X; r0.y = pos1Y; r0.z = pos1Z;
-    rd.x = dirX; rd.y = dirY; rd.z = dirZ;
-    
-    rd = rd.normalize();
-    
-    if (calcIntersection(r0, rd)) {
-        return true;
-    } else {
-        return false;
-    }
-}
+//bool calcIntersection(vec3D r0, vec3D rd) {
+//    //Max and min of bounding box for ball
+//    vec3D min, max;
+//    min.x = position.x - 0.5f; min.y = position.y - 0.5f; min.z = position.z - 0.5f;
+//    max.x = min.x + 1.0f; max.y = min.y + 1.0f; max.z = min.z + 1.0f;
+//    
+//    //Calculate points on the front face of the ball
+//    point3D p0, p1, p2, p3;
+//    p0.x = min.x; p0.y = min.y; p0.z = max.z;
+//    p1.x = max.x; p1.y = min.y; p1.z = max.z;
+//    p2.x = max.x; p2.y = max.y; p2.z = max.z;
+//    p3.x = min.x; p3.y = max.y; p3.z = max.z;
+//    
+//    //Calculate the equation of the plane intersecting with the face
+//    float a, b, c, d;
+//    vec3D t1, t2, norm;
+//    
+//    t1 = t1.createVector(p1, p0);
+//    t2 = t2.createVector(p2, p0);
+//    
+//    norm = t1.crossProduct(t2);
+//    
+//    norm = norm.normalize();
+//    
+//    d = -((norm.x * p0.x) + (norm.y * p0.y) + (norm.z * p0.z));
+//    a = norm.x; b = norm.y; c = norm.z;
+//    
+//    //Test for intersection of the ray and the plane
+//    float t, dot0, dotD;
+//    vec3D is;
+//    
+//    dot0 = (a * r0.x) + (b * r0.y) + (c * r0.z);
+//    dotD = (a * rd.x) + (b * rd.y) + (c * r0.z);
+//    
+//    if (dot0 == 0) return false;
+//    
+//    t = -((dot0 + d) / dotD);
+//    
+//    is = r0 + rd.vectorMultiply(t);
+//    
+//    if ((is.x > p0.x) && (is.x < p1.x) && (is.y > p0.y) && (is.y < p2.y)) {
+//        return true;
+//    } else {
+//        return false;
+//    }
+//    
+//    
+//    
+//}
+
+//bool rayCast(float x, float y) {
+//    GLint viewport[4];          //declaring arrays and variables
+//    GLdouble modelview[16];
+//    GLdouble projection[16];
+//    float winX;
+//    float winY;
+//    GLdouble pos1X, pos1Y, pos1Z;
+//    GLdouble pos2X, pos2Y, pos2Z;
+//    GLdouble dirX, dirY, dirZ;
+//    vec3D r0, rd;
+//    
+//    glGetIntegerv(GL_VIEWPORT, viewport);
+//    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+//    
+//    glGetDoublev(GL_PROJECTION_MATRIX, projection);
+//    
+//    //Flip the y coordinate to have the proper opengl screen coords
+//    winX = x;
+//    winY = (float)viewport[3] - y;
+//    
+//    //Unproject the coordinates from screen to world coordinates on the near clipping plane
+//    gluUnProject(winX, winY, 0.0, modelview, projection, viewport, &pos1X, &pos1Y, &pos1Z);
+//    
+//    //Unproject the coordinates from screen to world coordinates on the far clipping plane
+//    gluUnProject(winX, winY, 1.0, modelview, projection, viewport, &pos2X, &pos2Y, &pos2Z);
+//    
+//    //Calculate a normalized ray between the far and near clipping planes
+//    dirX = pos2X - pos1X;
+//    dirY = pos2Y - pos1Y;
+//    dirZ = pos2Z - pos1Z;
+//    
+//    r0.x = pos1X; r0.y = pos1Y; r0.z = pos1Z;
+//    rd.x = dirX; rd.y = dirY; rd.z = dirZ;
+//    
+//    rd = rd.normalize();
+//    
+//    if (calcIntersection(r0, rd)) {
+//        return true;
+//    } else {
+//        return false;
+//    }
+//}
 
 
 void mouse(int btn, int state, int x, int y){
-    
-    if (btn == GLUT_LEFT_BUTTON && launched == false){
+    if (pendingStop){
+        if (calcInter(x, y)){
+            pendingStop = false;
+            resetBall();
+        }
+        
+    }
+    else if (btn == GLUT_LEFT_BUTTON && launched == false){
         if (state == GLUT_DOWN){
             startingMousepos[0] = x, startingMousepos[1] = y;       //store the starting mouse position
             startTime=(GLfloat)glutGet(GLUT_ELAPSED_TIME);          //store the time when the user first clicks down

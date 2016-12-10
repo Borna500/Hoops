@@ -218,10 +218,10 @@ void drawBall(){
     glTranslatef(position.x,position.y,position.z);
     //printf("%f",position[1]);
     // glBindTexture(GL_TEXTURE_2D, textures[0]);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  amb0); //putting material onto the terrain
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  diff0);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  spec0);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  128);
+//    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb4); //putting material onto the terrain
+//    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff4);
+//    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec4);
+//    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny4);
 
     sphereOBJ = gluNewQuadric();
     gluQuadricDrawStyle(sphereOBJ, GLU_FILL);
@@ -577,6 +577,8 @@ bool movingRight = true;
 float pos[] = {0,1,0};
 float rot[] = {0,0,0};
 float headRot[] = {0,0,0};
+float snowmanPos = 0;
+
 void DrawSnowman(float* pos, float* rot){
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the terrain
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
@@ -584,31 +586,28 @@ void DrawSnowman(float* pos, float* rot){
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
     
     glPushMatrix();
-    int level = L->lvl * 10;
-    // printf("%i\n", counter);
-    if(movingRight == true){
-        if(snowmanCounter > -50){
-            glTranslatef(0.1*snowmanCounter,0,0);
-            snowmanCounter--;
-        } else if (snowmanCounter == -50){
-            glTranslatef(0.1*snowmanCounter,0,0);
-            snowmanCounter++;
+    
+    // determine snowman's direction
+    if (movingRight){
+        if(snowmanPos > 10){
             movingRight = false;
         }
     }
-    
-    if(movingRight == false){
-        if(snowmanCounter < 50){
-            glTranslatef(0.1*snowmanCounter,0,0);
-            snowmanCounter++;
-            
-        } else if(snowmanCounter == 50){
-            glTranslatef(0.1*snowmanCounter,0,0);
-            snowmanCounter--;
+    else{
+        if(snowmanPos < -10){
             movingRight = true;
         }
+        
     }
-    
+    //move snoman in direction
+    if (movingRight){
+        snowmanPos+=0.1;
+    }
+    else{
+        snowmanPos-=0.1;
+    }
+    glTranslatef(snowmanPos, 0, 0);
+
     
     glPushMatrix();
     

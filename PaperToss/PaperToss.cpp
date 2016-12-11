@@ -367,9 +367,8 @@ void cartesiontospherical(){
 	}
 
 }
-
-
-
+int jassf;
+//aAAA
 // void updatelookatposition(){
     
 //     lookat[0] = lookatradius * sin(lookatphi) * cos(lookattheta);

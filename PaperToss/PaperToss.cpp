@@ -41,6 +41,7 @@ vec3D acceleration;
 float ballRadius;
 ballType ball;
 float ballBounciness;
+int text = 4;
 
 //Basket variables
 float basketRadius;
@@ -65,7 +66,7 @@ float m_diff2[] = {0.01, 0.01, 0.01, 1.0};
 float m_spec2[] = {0.50, 0.50, 0.50, 1.0};
 float shiny2 = 0.25;
 
-float m_amb3[] = {0.0, 0.0, 0.0, 1.0}; //setting the material for the ambient, diffuse and specular values white plastic
+float m_amb3[] = {0.3, 0.3, 0.3, 1.0}; //setting the material for the ambient, diffuse and specular values white plastic
 float m_diff3[] = {0.55, 0.55, 0.55, 1.0};
 float m_spec3[] = {0.70, 0.70, 0.70, 1.0};
 float shiny3 = 0.25;
@@ -138,7 +139,7 @@ float lookatphi = 0;
 // z = eyeradius * sin(eyetheta) * sin(eyephi)
 
 //Texture variables
-bool textureToggle = false;
+bool textureToggle = true;
 
 GLubyte *img_data1;
 GLubyte *img_data2;
@@ -216,12 +217,10 @@ void drawBall(){
     
     glPushMatrix();
     glTranslatef(position.x,position.y,position.z);
-    //printf("%f",position[1]);
-    // glBindTexture(GL_TEXTURE_2D, textures[0]);
-//    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb4); //putting material onto the terrain
-//    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff4);
-//    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec4);
-//    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny4);
+   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb4); //putting material onto the terrain
+   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff4);
+   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec4);
+   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny4);
 
     sphereOBJ = gluNewQuadric();
     gluQuadricDrawStyle(sphereOBJ, GLU_FILL);
@@ -331,6 +330,139 @@ void initTexture(void) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
+
+void ballTexture(){
+    switch(text){
+        case 2:
+            glBindTexture(GL_TEXTURE_2D, textures[0]);
+            break;
+            
+        case 3:
+            glBindTexture(GL_TEXTURE_2D, textures[1]);
+            break;
+            
+        case 4:
+            glBindTexture(GL_TEXTURE_2D, textures[2]);
+            break;
+    }
+}
+
+int snowmanCounter = 0;
+bool movingRight = true;
+float pos[] = {0,1,0};
+float rot[] = {0,0,0};
+float headRot[] = {0,0,0};
+float snowmanPos = 0;
+
+void DrawSnowman(float* pos, float* rot){
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the terrain
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec3);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
+    
+    glPushMatrix();
+    
+    // determine snowman's direction
+    if (movingRight){
+        if(snowmanPos > 10){
+            movingRight = false;
+        }
+    }
+    else{
+        if(snowmanPos < -10){
+            movingRight = true;
+        }
+        
+    }
+    //move snoman in direction
+    if (movingRight){
+        snowmanPos+=0.1;
+    }
+    else{
+        snowmanPos-=0.1;
+    }
+    glTranslatef(snowmanPos, 0, 0);
+
+    
+    glPushMatrix();
+    
+    glTranslatef(pos[0], pos[1], pos[2]);
+    // glRotatef(rot[1], 0, 1, 0);
+    glRotatef(180,0,1,0);
+    
+    //draw body
+    glColor3f(1,1,1);
+    glutSolidSphere(1, 16, 16);
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the terrain
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
+    
+    //draw buttons
+    glPushMatrix();
+    glTranslatef(0, 0.35, 0.9);
+    glColor3f(0, 0, 0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslatef(0, 0.15, 0.95);
+    glColor3f(0, 0, 0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslatef(0, -0.05, 0.95);
+    glColor3f(0, 0, 0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec3);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
+    
+    glPushMatrix();
+    //translate relative to body, and draw head
+    glTranslatef(0, 1.25, 0);
+    glRotatef(headRot[1], 0, 1, 0); //turn the head relative to the body
+    glColor3f(1,1,1);
+    glutSolidSphere(0.5, 16, 16);
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
+    
+    //translate and draw right eye
+    glPushMatrix();
+    glTranslatef(0.2, 0.15, 0.45);
+    glColor3f(0,0,0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    //translate and draw left eye
+    glPushMatrix();
+    glTranslatef(-0.2, 0.15, 0.45);
+    glColor3f(0,0,0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    //translate and draw nose
+    glPushMatrix();
+    glTranslatef(0, 0, 0.5);
+    glColor3f(1,0.4,0);
+    glutSolidSphere(0.1, 10, 10);
+    glPopMatrix();
+    
+    glPopMatrix();//body
+    glPopMatrix();//snowman
+    
+    glPopMatrix();
+}
+
 
 void updateeyeposition(){
 
@@ -454,6 +586,10 @@ void resetBall() {
     bounced = false;
 }
 
+int updateinterval = 120;
+
+
+
 
 void ballMotion(int value){
 
@@ -474,14 +610,14 @@ void ballMotion(int value){
     }
     if (launched == true) {
     	//Increment velocity based on acceleration
-	    velocity.x = velocity.x + acceleration.x/60;
-	    velocity.y = velocity.y + acceleration.y/60;
-	    velocity.z = velocity.z + acceleration.z/60;
+	    velocity.x = velocity.x + acceleration.x/updateinterval;
+	    velocity.y = velocity.y + acceleration.y/updateinterval;
+	    velocity.z = velocity.z + acceleration.z/updateinterval;
 
 	    //Increment position based on velocity
-	    position.x += velocity.x/60;
-	    position.y += velocity.y/60;
-	    position.z += velocity.z/60;
+	    position.x += velocity.x/updateinterval;
+	    position.y += velocity.y/updateinterval;
+	    position.z += velocity.z/updateinterval;
 
 	    //Reset variables
 	    intersectedFaceNormal.x = 0; intersectedFaceNormal.y = 0; intersectedFaceNormal.z = 0;
@@ -495,6 +631,7 @@ void ballMotion(int value){
 	    		fInd = intersectionIndex.at(1);
 	    		intersectedFaceNormal = L->levelObjects->at(oInd)->objectFaces->at(fInd)->normal;
 	    		intersectedFacePosition = L->levelObjects->at(oInd)->objectFaces->at(fInd)->min;
+                printf("%i, %i\n", oInd, fInd);
 	    	}
 	    }
 
@@ -507,13 +644,13 @@ void ballMotion(int value){
 	    //Intersecting with right object face
 	   	else if (intersectedFaceNormal.x == -1) {
 	    	velocity.x = -1 * (velocity.x - ballBounciness *velocity.x);
-            position.x = intersectedFacePosition.x + velocity.x/60 - ballRadius;
+            position.x = intersectedFacePosition.x + velocity.x/updateinterval - ballRadius;
 	    }
 
 	    //Intersecting with bottom object face
 	    else if (intersectedFaceNormal.y == 1) {
 	    	velocity.y = -1 * (velocity.y - ballBounciness *velocity.y);
-            position.y = intersectedFacePosition.y + velocity.y/60 + ballRadius;
+            position.y = intersectedFacePosition.y + velocity.y/updateinterval + ballRadius;
             if (intersectedFacePosition.y == 0) {
             	bounced = true;
             }
@@ -522,20 +659,20 @@ void ballMotion(int value){
 	    //Intersecting with top object face
 	    else if (intersectedFaceNormal.y == -1) {
 	    	velocity.y = -1 * (velocity.y - ballBounciness * velocity.y);
-            position.y = intersectedFacePosition.y + velocity.y/60 - ballRadius;
+            position.y = intersectedFacePosition.y + velocity.y/updateinterval - ballRadius;
 
 	    }
 
 	    //Intersecting with front object face
 	    else if (intersectedFaceNormal.z == 1) {
             velocity.z = -1 * (velocity.z - ballBounciness * velocity.z);
-            position.z = intersectedFacePosition.z + velocity.z/60 + ballRadius;
+            position.z = intersectedFacePosition.z + velocity.z/updateinterval + ballRadius;
 	    }
 
 	    //Intersecting with back object face
 	    else if (intersectedFaceNormal.z == -1) {
             velocity.z = -1 * (velocity.z - ballBounciness * velocity.z);
-            position.z = intersectedFacePosition.z + velocity.z/60 - ballRadius;
+            position.z = intersectedFacePosition.z + velocity.z/updateinterval - ballRadius;
 	    }
 
         //Intersection with inside of basket (scoring)
@@ -544,10 +681,11 @@ void ballMotion(int value){
                 if (position.y > basketPos.y && position.y < (basketPos.y + 0.5f) && !bounced) {
                     resetBall();
                     intscorecounter++;
-                    switchRound(intscorecounter % 5);
+                    switchRound(intscorecounter % 5 + 1);
                     if (intscorecounter != 0 && intscorecounter % 5 == 0) {
                     	currentLevel++;
                     	switchLevel(currentLevel);
+                        text--;
                     }
                 }
             }
@@ -557,151 +695,21 @@ void ballMotion(int value){
              if ((position.z > (basketPos.z - basketRadius)) && (position.z < (basketPos.z + basketRadius))) {
                 if (position.y < basketPos.y  && bounced) {
                      velocity.x = -1*(velocity.x - ballBounciness * velocity.x);       //lose half magnitude and reverse direction
-                     position.x = position.x + velocity.x/60;
+                     position.x = position.x + velocity.x/updateinterval;
 
                      velocity.z = -1*(velocity.z - ballBounciness *velocity.z);       //lose half magnitude and reverse direction
-                     position.x = position.x + velocity.x/60;
+                     position.x = position.x + velocity.x/updateinterval;
                 }
             }
         }
+        //Snowman intersection
 
     }
 
-    glutTimerFunc(17,ballMotion,0);
+    glutTimerFunc(5,ballMotion,0);
 
 }
-int snowmanCounter = 0;
-bool movingRight = true;
-float pos[] = {0,1,0};
-float rot[] = {0,0,0};
-float headRot[] = {0,0,0};
-float snowmanPos = 0;
 
-void DrawSnowman(float* pos, float* rot){
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the terrain
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec3);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
-    
-    glPushMatrix();
-    
-    // determine snowman's direction
-    if (movingRight){
-        if(snowmanPos > 10){
-            movingRight = false;
-        }
-    }
-    else{
-        if(snowmanPos < -10){
-            movingRight = true;
-        }
-        
-    }
-    //move snoman in direction
-    if (movingRight){
-        snowmanPos+=0.1;
-    }
-    else{
-        snowmanPos-=0.1;
-    }
-    glTranslatef(snowmanPos, 0, 0);
-
-    
-    glPushMatrix();
-    
-    glTranslatef(pos[0], pos[1], pos[2]);
-    // glRotatef(rot[1], 0, 1, 0);
-    glRotatef(180,0,1,0);
-    
-    //draw body
-    glColor3f(1,1,1);
-    glutSolidSphere(1, 16, 16);
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the terrain
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
-    
-    //draw buttons
-    glPushMatrix();
-    glTranslatef(0, 0.35, 0.9);
-    glColor3f(0, 0, 0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    glPushMatrix();
-    glTranslatef(0, 0.15, 0.95);
-    glColor3f(0, 0, 0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    glPushMatrix();
-    glTranslatef(0, -0.05, 0.95);
-    glColor3f(0, 0, 0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec3);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
-    
-    glPushMatrix();
-    //translate relative to body, and draw head
-    glTranslatef(0, 1.25, 0);
-    glRotatef(headRot[1], 0, 1, 0); //turn the head relative to the body
-    glColor3f(1,1,1);
-    glutSolidSphere(0.5, 16, 16);
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
-    
-    //translate and draw right eye
-    glPushMatrix();
-    glTranslatef(0.2, 0.15, 0.45);
-    glColor3f(0,0,0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    //translate and draw left eye
-    glPushMatrix();
-    glTranslatef(-0.2, 0.15, 0.45);
-    glColor3f(0,0,0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    //translate and draw nose
-    glPushMatrix();
-    glTranslatef(0, 0, 0.5);
-    glColor3f(1,0.4,0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    glPopMatrix();//body
-    glPopMatrix();//snowman
-    
-    glPopMatrix();
-}
-int text = 1;
-
-void ballTexture(){
-    switch(text){
-        case 2:
-            glBindTexture(GL_TEXTURE_2D, textures[0]);
-            break;
-            
-        case 3:
-            glBindTexture(GL_TEXTURE_2D, textures[1]);
-            break;
-            
-        case 4:
-            glBindTexture(GL_TEXTURE_2D, textures[2]);
-            break;
-    }
-}
 float input1, input2, input3;
 void keyboard(unsigned char key, int x, int y)
 {

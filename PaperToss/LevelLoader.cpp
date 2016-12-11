@@ -12,15 +12,23 @@
 #include "math3D.h"
 #include <vector>
 #include <stdio.h>
-float m_amb[] = {0.33, 0.22, 0.03, 1.0};
-float m_diff[] = {0.78, 0.57, 0.11, 1.0};
-float m_spec[] = {0.99, 0.91, 0.81, 1.0};
+float ma[] = {0.1745, 0.01175, 0.01175, 1.0};
+float md[] = {0.61424, 0.04136, 0.04136, 1.0};
+float ms[] = {0.727811, 0.626959, 0.626959, 1.0};
 
-float shiny = 27.8;
+float ma2[] = {0.0215, 0.1745, 0.0215, 1.0};
+float md2[] = {0.07568, 0.61424, 0.07568, 1.0};
+float ms2[] = {0.633, 0.727811, 0.633, 1.0};
+
+float sh = 1.0;
+float sh2 = 3.2;
 
 Face::Face(){}
 
-Face::Face(point3D min, point3D max, int normalflip) {
+Face::Face(point3D min, point3D max, int normalflip, int material) {
+
+	printf("ok so %f %f %f %f %f %f\n", min.x, min.y, min.z, max.x, max.y, max.z);
+	materialIndex = material;
 
 	if (min.x == max.x) {
 		p0.x = min.x; p0.y = min.y; p0.z = min.z;
@@ -76,13 +84,68 @@ Object::Object(objectType o, point3D min, point3D max, int normalflip, int mater
 	t = o;
 	objectFaces = new vector<Face*>();
     materialIndex = material;
+
+    point3D frontMin;
+    point3D frontMax;
+
+    point3D backMin;
+    point3D backMax;
+
+    point3D leftMin;
+    point3D leftMax;
+
+    point3D rightMin;
+    point3D rightMax;
+
+    point3D bottomMin;
+    point3D bottomMax;
+
+    point3D topMin;
+    point3D topMax;
     
 	switch (t) {
 		case plane:
 		{	
-			Face *plane = new Face(min, max, normalflip);
+			Face *plane = new Face(min, max, normalflip, material);
 			objectFaces->push_back(plane);
 		}
+		break;
+		case box:
+		{
+			backMin.x = min.x; backMin.y = min.y; backMin.z = min.z;
+			backMax.x = max.x; backMax.y = max.y; backMax.z = min.z;
+
+			frontMin.x = min.x; frontMin.y = min.y; frontMin.z = max.z;
+			frontMax.x = max.x; frontMax.y = max.y; frontMax.z = max.z;
+
+			leftMin.x = min.x; leftMin.y = min.y; leftMin.z = min.z;
+			leftMax.x = min.x; leftMax.y = max.y; leftMax.z = max.z;
+
+			rightMin.x = max.x; rightMin.y = min.y; rightMin.z = min.z;
+			rightMax.x = max.x; rightMax.y = max.y; rightMax.z = max.z;
+
+			bottomMin.x = min.x; bottomMin.y = min.y; bottomMin.z = min.z;
+			bottomMax.x = max.x; bottomMax.y = min.y; bottomMax.z = max.z;
+
+			topMin.x = min.x; topMin.y = max.y; topMin.z = min.z;
+			topMax.x = max.x; topMax.y = max.y; topMax.z = max.z;
+
+			Face *back = new Face(backMin, backMax, -1, material);
+			Face *front = new Face(frontMin, frontMax, 1, material);
+			Face *left = new Face(leftMin, leftMax, -1, material);
+			Face *right = new Face(rightMin, rightMax, 1, material);
+			Face *bottom = new Face(bottomMin, bottomMax, -1, material);
+			Face *top = new Face(topMin, topMax, 1, material);
+
+			objectFaces->push_back(back);
+			objectFaces->push_back(front);
+			objectFaces->push_back(left);
+			objectFaces->push_back(right);
+			objectFaces->push_back(bottom);
+			objectFaces->push_back(top);
+		}
+		break;
+
 
 	}
 
@@ -108,6 +171,28 @@ Level::Level(int l) {
 
 	point3D fBoundMin;
 	point3D fBoundMax;
+
+	point3D obs1BoundMin;
+	point3D obs1BoundMax;
+
+
+	point3D obs2BoundMin;
+	point3D obs2BoundMax;
+
+	point3D obs3BoundMin;
+	point3D obs3BoundMax;
+
+	point3D obs4BoundMin;
+	point3D obs4BoundMax;
+
+	point3D obs5BoundMin;
+	point3D obs5BoundMax;
+
+	Object* obstacle1;
+	Object* obstacle2;
+	Object* obstacle3;
+	Object* obstacle4;
+	Object* obstacle5;
     //loadMaterials();
 
 
@@ -176,15 +261,49 @@ Level::Level(int l) {
 			fBoundMin.x = -20; fBoundMin.y = 0; fBoundMin.z = -20;
 			fBoundMax.x = 20; fBoundMax.y = 0; fBoundMax.z = 20;
 
-			basketPosition1.x = 0; basketPosition1.y = 5; basketPosition1.z = -8;
+			obs1BoundMin.x = -5; obs1BoundMin.y = 0; obs1BoundMin.z = -3;
+			obs1BoundMax.x = 5; obs1BoundMax.y = 2; obs1BoundMax.z = 3;
+
+			obs2BoundMin.x = -5; obs2BoundMin.y = 6; obs2BoundMin.z = -2;
+			obs2BoundMax.x = 5; obs2BoundMax.y = 9; obs2BoundMax.z = 2;
+
+			obs3BoundMin.x = -20; obs3BoundMin.y = 4; obs3BoundMin.z = -3;
+			obs3BoundMax.x = -15; obs3BoundMax.y = 7; obs3BoundMax.z = 3;
+
+			obs4BoundMin.x = 15; obs4BoundMin.y = 4; obs4BoundMin.z = -3;
+			obs4BoundMax.x = 20; obs4BoundMax.y = 7; obs4BoundMax.z = 3;
+
+			obs5BoundMin.x = -6; obs5BoundMin.y = 0; obs5BoundMin.z = 12;
+			obs5BoundMax.x = 6; obs5BoundMax.y = 7; obs5BoundMax.z = 15;
+
+			obstacle1 = new Object(box, obs1BoundMin, obs1BoundMax, 1, 1);
+			obstacle2 = new Object(box, obs2BoundMin, obs2BoundMax, 1, 1);
+			obstacle3 = new Object(box, obs3BoundMin, obs3BoundMax, 1, 1);
+			obstacle4 = new Object(box, obs4BoundMin, obs4BoundMax, 1, 1);
+			obstacle5 = new Object(box, obs5BoundMin, obs5BoundMax, 1, 1);
+
+			levelObjects->push_back(obstacle1);
+			levelObjects->push_back(obstacle2);
+			levelObjects->push_back(obstacle3);
+			levelObjects->push_back(obstacle4);
+			levelObjects->push_back(obstacle5);
+
+
+
+			basketPosition1.x = 1; basketPosition1.y = 2; basketPosition1.z = -4;
+			basketPosition2.x = -3; basketPosition2.y = 2; basketPosition2.z = -7;
+			basketPosition3.x = 10; basketPosition3.y = 4; basketPosition3.z = 15;
+			basketPosition4.x = 3; basketPosition4.y = 5; basketPosition4.z = -15;
+			basketPosition5.x = 0; basketPosition5.y = 5; basketPosition5.z = -8;
+
 			basketRadius = 1;
 
 		break;
 
 		case 3:
-			ballRadius = 0.5; 
-			ballBounciness = 0.9;
-			ball = bouncy;
+			ballRadius = 0.8; 
+			ballBounciness = 0.2;
+			ball = rock;
 
 			startingPosition.x = 0; startingPosition.y = 1; startingPosition.z = 8;
 
@@ -212,17 +331,17 @@ Level::Level(int l) {
 		break;
 	}
 		printf("Left wall\n");
-		Object* leftWall = new Object(plane, lBoundMin, lBoundMax, 1, 0);
+		Object* leftWall = new Object(plane, lBoundMin, lBoundMax, 1, 2);
 		printf("Right wall\n");
-		Object* rightWall = new Object(plane, rBoundMin, rBoundMax, -1, 0);
+		Object* rightWall = new Object(plane, rBoundMin, rBoundMax, -1, 2);
 		printf("Back wall\n");
-		Object* backWall = new Object(plane, bBoundMin, bBoundMax, 1, 0);
+		Object* backWall = new Object(plane, bBoundMin, bBoundMax, 1, 2);
 
-		Object* frontWall = new Object(plane, dBoundMin, dBoundMax, -1, 0);
+		Object* frontWall = new Object(plane, dBoundMin, dBoundMax, -1, 2);
 		printf("Floor\n");
-		Object* floor = new Object(plane, fBoundMin, fBoundMax, 1, 0);
+		Object* floor = new Object(plane, fBoundMin, fBoundMax, 1, 2);
 		printf("Ceiling\n");
-		Object* ceiling = new Object(plane, cBoundMin, cBoundMax, -1, 0);
+		Object* ceiling = new Object(plane, cBoundMin, cBoundMax, -1, 2);
 
 		levelObjects->push_back(leftWall);
 		levelObjects->push_back(rightWall);
@@ -288,10 +407,22 @@ int Object::testIntersection(float x, float y, float z, float ballRad) {
 
 void Face::drawFace(int i) { // i is the index of the material for this face
 	//printf("Drawing a face\n");
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb); //putting material onto the terrain
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_spec);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, m_diff);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny*128);
+	switch(materialIndex) {
+		case 1:
+    		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  ma); //putting material onto the terrain
+   			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  ms);
+    		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, md);
+    		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  sh*128);
+    	break;
+		case 2:
+		    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  ma2); //putting material onto the terrain
+   			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  ms2);
+    		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, md2);
+    		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  sh2*128);
+    	break;
+
+	}
+
 	glBegin(GL_QUADS);
 		glNormal3f(normal.x, normal.y, normal.z);
 		glVertex3f(p0.x, p0.y, p0.z);
@@ -308,7 +439,7 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 
 	//Hitting the left side of the object
 	if (normal.x == 1) {
-		if (x - ballRad < min.x){
+		if (x - ballRad < min.x && x + ballRad > min.x){
 			if (y >= min.y && y <= max.y && z >= min.z && z <= max.z) {
 				//printf("OOPsx+\n");
 				return true;
@@ -318,7 +449,7 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 	}
 	//Hitting the right side of the object
 	else if (normal.x == -1) {
-		if (x + ballRad > max.x){
+		if (x + ballRad > max.x && x - ballRad < max.x){
 			if (y >= min.y && y <= max.y && z >= min.z && z <= max.z) {
 				//printf("OOPsx-\n");
 				return true;
@@ -328,7 +459,7 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 	}
 	//Hitting the bottom of the face
 	else if (normal.y == 1) {
-		if (y - ballRad < min.y){
+		if (y - ballRad < min.y && y + ballRad > max.y){
 			if (x >= min.x && x <= max.x && z >= min.z && z <= max.z) {
 				//printf("OOPsy+\n");
 				return true;
@@ -337,7 +468,7 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 	}
 	//Hitting the top of the face
 	else if (normal.y == -1) {
-		if (y + ballRad > max.y){
+		if (y + ballRad > max.y && y - ballRad < max.y){
 			if (x >= min.x && x <= max.x && z >= min.z && z <= max.z) {
 				return true;
 			}
@@ -346,8 +477,9 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 
 	//Hitting the front of an object
 	else if (normal.z == 1) {
-		if (z - ballRad < min.z){
+		if (z - ballRad < min.z && z + ballRad > min.z){
 			if (x >= min.x && x <= max.x && y >= min.y && y <= max.y) {
+				printf("Intersected with %f %f\n", min.z, z);
 				return true;
 			}
 		}
@@ -356,7 +488,7 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 
 	//Hitting the back of an object
 	else if (normal.z == -1) {
-		if (z + ballRad > max.z){
+		if (z + ballRad > max.z && z - ballRad < max.z){
 			if (x >= min.x && x <= max.x && y >= min.y && y <= max.y) {
 				return true;
 			}

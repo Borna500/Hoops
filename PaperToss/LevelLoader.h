@@ -26,7 +26,7 @@ class Level;
 class Face {
 public:
 	Face();
-	Face(point3D min, point3D max, int normalflip);
+	Face(point3D min, point3D max, int normalflip, int material);
 	point3D min;
 	point3D max;
 	point3D p0;
@@ -34,6 +34,7 @@ public:
 	point3D p2;
 	point3D p3;
 	vec3D normal;
+	int materialIndex;
 
 
 	bool testIntersection(float x, float y, float z, float ballRad);

@@ -20,8 +20,18 @@ float ma2[] = {0.0215, 0.1745, 0.0215, 1.0};
 float md2[] = {0.07568, 0.61424, 0.07568, 1.0};
 float ms2[] = {0.633, 0.727811, 0.633, 1.0};
 
+float ma3[] = {0.05375, 0.05, 0.06625, 1.0};
+float md3[] = {0.18275, 0.17, 0.22525, 1.0};
+float ms3[] = {0.332741, 0.328634, 0.346435, 1.0};
+
+float ma4[] = {0.25, 0.20725, 0.20725, 1.0};
+float md4[] = {1, 0.829, 0.829, 1.0};
+float ms4[] = {0.296648, 0.296648, 0.296648, 1.0};
+
 float sh = 1.0;
 float sh2 = 3.2;
+float sh3 = 1.0;
+float sh4 = 0.7;
 
 Face::Face(){}
 
@@ -193,7 +203,8 @@ Level::Level(int l) {
 	Object* obstacle3;
 	Object* obstacle4;
 	Object* obstacle5;
-    //loadMaterials();
+
+	int wallmat;
 
 
 	lvl = l;
@@ -201,8 +212,9 @@ Level::Level(int l) {
 	levelObjects = new vector<Object*>();
 
 	switch(lvl) {
-		case 1:
-			ballRadius = 1; 
+		case 3:
+
+			ballRadius = 0.5; 
 			ballBounciness = 0.5;
 			ball = normal;
 
@@ -234,14 +246,16 @@ Level::Level(int l) {
 
 			basketRadius = 1;
 
+			wallmat = 2;
+
 		break;
 
-		case 2:
-			ballRadius = 0.5; 
+		case 1:
+			ballRadius = 1; 
 			ballBounciness = 0.9;
 			ball = bouncy;
 
-			startingPosition.x = 0; startingPosition.y = 1; startingPosition.z = 8;
+			startingPosition.x = 0; startingPosition.y = 1; startingPosition.z = 9;
 
 			lBoundMin.x = -20; lBoundMin.y = 0; lBoundMin.z = -20;
 			lBoundMax.x = -20; lBoundMax.y = 20; lBoundMax.z = 20;
@@ -265,7 +279,7 @@ Level::Level(int l) {
 			obs1BoundMax.x = 5; obs1BoundMax.y = 2; obs1BoundMax.z = 3;
 
 			obs2BoundMin.x = -5; obs2BoundMin.y = 6; obs2BoundMin.z = -2;
-			obs2BoundMax.x = 5; obs2BoundMax.y = 9; obs2BoundMax.z = 2;
+			obs2BoundMax.x = 5; obs2BoundMax.y = 9; obs2BoundMax.z = 1;
 
 			obs3BoundMin.x = -20; obs3BoundMin.y = 4; obs3BoundMin.z = -3;
 			obs3BoundMax.x = -15; obs3BoundMax.y = 7; obs3BoundMax.z = 3;
@@ -298,50 +312,75 @@ Level::Level(int l) {
 
 			basketRadius = 1;
 
+			wallmat = 3;
+
 		break;
 
-		case 3:
-			ballRadius = 0.8; 
+		case 2:
+			ballRadius = 1; 
 			ballBounciness = 0.2;
 			ball = rock;
 
-			startingPosition.x = 0; startingPosition.y = 1; startingPosition.z = 8;
+			startingPosition.x = 0; startingPosition.y = 1; startingPosition.z = 7;
 
-			lBoundMin.x = -10; lBoundMin.y = 0; lBoundMin.z = -10;
-			lBoundMax.x = -10; lBoundMax.y = 10; lBoundMax.z = 10;
+			lBoundMin.x = -15; lBoundMin.y = 0; lBoundMin.z = -15;
+			lBoundMax.x = -15; lBoundMax.y = 10; lBoundMax.z = 10;
 
-			rBoundMin.x = 10; rBoundMin.y = 0; rBoundMin.z = -10;
-			rBoundMax.x = 10; rBoundMax.y = 10; rBoundMax.z = 10;
+			rBoundMin.x = 15; rBoundMin.y = 0; rBoundMin.z = -15;
+			rBoundMax.x = 15; rBoundMax.y = 10; rBoundMax.z = 10;
 
-			bBoundMin.x = -10; bBoundMin.y = 0; bBoundMin.z = -10;
-			bBoundMax.x = 10; bBoundMax.y = 10; bBoundMax.z = -10;
+			bBoundMin.x = -15; bBoundMin.y = 0; bBoundMin.z = -15;
+			bBoundMax.x = 15; bBoundMax.y = 10; bBoundMax.z = -15;
 
-			dBoundMin.x = -10; dBoundMin.y = 0; dBoundMin.z = 10;
-			dBoundMax.x = 10; dBoundMax.y = 10; dBoundMax.z = 10;
+			dBoundMin.x = -15; dBoundMin.y = 0; dBoundMin.z = 10;
+			dBoundMax.x = 15; dBoundMax.y = 10; dBoundMax.z = 10;
 
-			cBoundMin.x = -10; cBoundMin.y = 10; cBoundMin.z = -10;
-			cBoundMax.x = 10; cBoundMax.y = 10; cBoundMax.z = 10;
+			cBoundMin.x = -15; cBoundMin.y = 10; cBoundMin.z = -15;
+			cBoundMax.x = 15; cBoundMax.y = 10; cBoundMax.z = 10;
 
-			fBoundMin.x = -10; fBoundMin.y = 0; fBoundMin.z = -10;
-			fBoundMax.x = 10; fBoundMax.y = 0; fBoundMax.z = 10;
+			fBoundMin.x = -15; fBoundMin.y = 0; fBoundMin.z = -15;
+			fBoundMax.x = 15; fBoundMax.y = 0; fBoundMax.z = 10;
 
-			basketPosition1.x = 0; basketPosition1.y = 2; basketPosition1.z = -8;
+			obs1BoundMin.x = -9; obs1BoundMin.y = 0; obs1BoundMin.z = -10;
+			obs1BoundMax.x = -4; obs1BoundMax.y = 5; obs1BoundMax.z = -5;
+
+			obs2BoundMin.x = 5; obs2BoundMin.y = 5; obs2BoundMin.z = -7;
+			obs2BoundMax.x = 10; obs2BoundMax.y = 10; obs2BoundMax.z = -2;
+
+			obs3BoundMin.x = -1; obs3BoundMin.y = 0; obs3BoundMin.z = -13;
+			obs3BoundMax.x = 5; obs3BoundMax.y = 10; obs3BoundMax.z = -8;
+
+			obstacle1 = new Object(box, obs1BoundMin, obs1BoundMax, 1, 1);
+			obstacle2 = new Object(box, obs2BoundMin, obs2BoundMax, 1, 1);
+			obstacle3 = new Object(box, obs3BoundMin, obs3BoundMax, 1, 1);
+
+			levelObjects->push_back(obstacle1);
+			levelObjects->push_back(obstacle2);
+			levelObjects->push_back(obstacle3);
+
+			basketPosition1.x = 0; basketPosition1.y = 2; basketPosition1.z = -5;
+			basketPosition2.x = -5; basketPosition2.y = 2; basketPosition2.z = -3;
+			basketPosition3.x = -2; basketPosition3.y = 1; basketPosition3.z = -9;
+			basketPosition4.x = 4; basketPosition4.y = 3; basketPosition4.z = -3;
+			basketPosition5.x = 7; basketPosition5.y = 2; basketPosition5.z = -5;
 			basketRadius = 1;
+
+			wallmat = 4;
 
 		break;
 	}
 		printf("Left wall\n");
-		Object* leftWall = new Object(plane, lBoundMin, lBoundMax, 1, 2);
+		Object* leftWall = new Object(plane, lBoundMin, lBoundMax, 1, wallmat);
 		printf("Right wall\n");
-		Object* rightWall = new Object(plane, rBoundMin, rBoundMax, -1, 2);
+		Object* rightWall = new Object(plane, rBoundMin, rBoundMax, -1, wallmat);
 		printf("Back wall\n");
-		Object* backWall = new Object(plane, bBoundMin, bBoundMax, 1, 2);
+		Object* backWall = new Object(plane, bBoundMin, bBoundMax, 1, wallmat);
 
-		Object* frontWall = new Object(plane, dBoundMin, dBoundMax, -1, 2);
+		Object* frontWall = new Object(plane, dBoundMin, dBoundMax, -1, wallmat);
 		printf("Floor\n");
-		Object* floor = new Object(plane, fBoundMin, fBoundMax, 1, 2);
+		Object* floor = new Object(plane, fBoundMin, fBoundMax, 1, wallmat);
 		printf("Ceiling\n");
-		Object* ceiling = new Object(plane, cBoundMin, cBoundMax, -1, 2);
+		Object* ceiling = new Object(plane, cBoundMin, cBoundMax, -1, wallmat);
 
 		levelObjects->push_back(leftWall);
 		levelObjects->push_back(rightWall);
@@ -419,6 +458,18 @@ void Face::drawFace(int i) { // i is the index of the material for this face
    			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  ms2);
     		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, md2);
     		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  sh2*128);
+    	break;
+    	case 3:
+		    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  ma3); //putting material onto the terrain
+   			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  ms3);
+    		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, md3);
+    		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  sh3*128);
+    	break;
+    	case 4:
+		    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  ma4); //putting material onto the terrain
+   			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  ms4);
+    		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, md4);
+    		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  sh4*128);
     	break;
 
 	}

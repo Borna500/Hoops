@@ -30,6 +30,7 @@
 
 using namespace std;
 
+//Global Variables
 //The level
 Level *L;
 int currentLevel;
@@ -55,12 +56,6 @@ float m_diff1[] = {0.54, 0.89, 0.63, 1.0};
 float m_spec1[] = {0.316228, 0.316228, 0.316228, 1.0};
 float shiny1 = 0.1;
 
-//obsidian
-// float m_amb1[] = {0.05375, 0.05, 0.06625, 1.0}; //setting the material for the ambient, diffuse and specular values
-// float m_diff1[] = {0.18275, 0.17, 0.22525, 1.0};
-// float m_spec1[] = {0.332741, 0.328634, 0.346435, 1.0};
-// float shiny1 = 0.3;
-
 float m_amb2[] = {0.0, 0.0, 0.0, 1.0}; //setting the material for the ambient, diffuse and specular values black plastic
 float m_diff2[] = {0.01, 0.01, 0.01, 1.0};
 float m_spec2[] = {0.50, 0.50, 0.50, 1.0};
@@ -79,14 +74,6 @@ float shiny4 = 0.088;
 float amb0[4] = {1,1,1,1};
 float diff0[4] = {1,1,1,1};
 float spec0[4] = {1,1,1,1};
-//float m_amb[] = {0.33, 0.22, 0.03, 1.0};
-//float m_diff[] = {0.78, 0.57, 0.11, 1.0};
-//float m_spec[] = {0.99, 0.91, 0.81, 1.0};
-
-//float m_amb[] = {0.33, 0.22, 0.03, 1.0}; 
-//float m_diff[] = {0.78, 0.57, 0.11, 1.0}; 
-//float m_spec[] = {0.99, 0.91, 0.81, 1.0}; 
-//float shiny = 27.8;
 
 float light1_pos[]= {-5, 5, 0,1}; //last num one is pofloat light
 float light2_pos[]= {5, 5, 0,1}; //last num one is pofloat light
@@ -122,9 +109,6 @@ float eyey = 6;
 float eyez = 7;
 
 bool spherical = false; 
-
-
-// BORNA UPDATE FROM HERE
 
 float eyeradius = 7;
 float eyetheta = 4.71;
@@ -212,25 +196,25 @@ void switchLevel(int i) {
 	setStartingParameters();
 }
 
+//drawing the ball that is thrown function
 void drawBall(){
-
-    
     glPushMatrix();
-    glTranslatef(position.x,position.y,position.z);
-   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb4); //putting material onto the terrain
-   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff4);
-   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec4);
-   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny4);
+    //everytime the ball travels one circumference it will rotate one revolution
+        glTranslatef(position.x,position.y,position.z);  //movement of the ball by the position 
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb4); //putting material onto the ball
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff4);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec4);
+        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny4);
 
-    sphereOBJ = gluNewQuadric();
-    gluQuadricDrawStyle(sphereOBJ, GLU_FILL);
-    gluQuadricTexture(sphereOBJ, GL_TRUE);
-    gluQuadricNormals(sphereOBJ, GLU_SMOOTH);
-    
-    gluSphere(sphereOBJ, 1, 100, 100);
+        sphereOBJ = gluNewQuadric();                //putting texture onto the bal
+        gluQuadricDrawStyle(sphereOBJ, GLU_FILL);
+        gluQuadricTexture(sphereOBJ, GL_TRUE);
+        gluQuadricNormals(sphereOBJ, GLU_SMOOTH);
+        gluSphere(sphereOBJ, 1, 100, 100);  //drawing the sphere/ball
     glPopMatrix();
 }
 
+//LoadPPM function that does all the textures 
 GLubyte* LoadPPM(char* file, int* width, int* height, int* ppmax)
 {
     GLubyte* img;
@@ -331,6 +315,7 @@ void initTexture(void) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+//switching between the textures given
 void ballTexture(){
     switch(text){
         case 2:
@@ -347,12 +332,13 @@ void ballTexture(){
     }
 }
 
-int snowmanCounter = 0;
-bool movingRight = true;
+//global variables for the snowman
+int snowmanCounter = 0; //counter
+bool movingRight = true;    //snowman is moving right/left
 float pos[] = {0,1,0};
 float rot[] = {0,0,0};
 float headRot[] = {0,0,0};
-float snowmanPos = 0;
+point3D snowmanPos = point3D{0, 1, 0};
 
 void DrawSnowman(float* pos, float* rot){
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the terrain
@@ -361,132 +347,127 @@ void DrawSnowman(float* pos, float* rot){
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
     
     glPushMatrix();
-    
+
     // determine snowman's direction
     if (movingRight){
-        if(snowmanPos > 10){
+        if(snowmanPos.x > 10){
             movingRight = false;
         }
     }
     else{
-        if(snowmanPos < -10){
+        if(snowmanPos.x < -10){
             movingRight = true;
         }
         
     }
-    //move snoman in direction
+    //move snowman in direction
     if (movingRight){
-        snowmanPos+=0.1;
+        snowmanPos.x+=0.1;
     }
     else{
-        snowmanPos-=0.1;
+        snowmanPos.x-=0.1;
     }
-    glTranslatef(snowmanPos, 0, 0);
-
+    glTranslatef(snowmanPos.x, snowmanPos.y, snowmanPos.z);
     
-    glPushMatrix();
-    
-    glTranslatef(pos[0], pos[1], pos[2]);
-    // glRotatef(rot[1], 0, 1, 0);
-    glRotatef(180,0,1,0);
-    
-    //draw body
-    glColor3f(1,1,1);
-    glutSolidSphere(1, 16, 16);
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the terrain
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
-    
-    //draw buttons
-    glPushMatrix();
-    glTranslatef(0, 0.35, 0.9);
-    glColor3f(0, 0, 0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    glPushMatrix();
-    glTranslatef(0, 0.15, 0.95);
-    glColor3f(0, 0, 0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    glPushMatrix();
-    glTranslatef(0, -0.05, 0.95);
-    glColor3f(0, 0, 0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec3);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
-    
-    glPushMatrix();
-    //translate relative to body, and draw head
-    glTranslatef(0, 1.25, 0);
-    glRotatef(headRot[1], 0, 1, 0); //turn the head relative to the body
-    glColor3f(1,1,1);
-    glutSolidSphere(0.5, 16, 16);
-    
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
-    
-    //translate and draw right eye
-    glPushMatrix();
-    glTranslatef(0.2, 0.15, 0.45);
-    glColor3f(0,0,0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    //translate and draw left eye
-    glPushMatrix();
-    glTranslatef(-0.2, 0.15, 0.45);
-    glColor3f(0,0,0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    //translate and draw nose
-    glPushMatrix();
-    glTranslatef(0, 0, 0.5);
-    glColor3f(1,0.4,0);
-    glutSolidSphere(0.1, 10, 10);
-    glPopMatrix();
-    
-    glPopMatrix();//body
-    glPopMatrix();//snowman
+           glPushMatrix();
+        
+            glTranslatef(pos[0], pos[1], pos[2]);
+            // glRotatef(rot[1], 0, 1, 0);
+            glRotatef(180,0,1,0);
+            
+            //draw body
+            glColor3f(1,1,1);
+            glutSolidSphere(1, 16, 16);
+            
+            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the snowman buttons
+            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
+            glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
+            
+            //draw buttons
+            glPushMatrix();
+                glTranslatef(0, 0.35, 0.9);
+                glColor3f(0, 0, 0);
+                glutSolidSphere(0.1, 10, 10);
+            glPopMatrix();
+            
+            glPushMatrix();
+                glTranslatef(0, 0.15, 0.95);
+                glColor3f(0, 0, 0);
+                glutSolidSphere(0.1, 10, 10);
+            glPopMatrix();
+            
+            glPushMatrix();
+                glTranslatef(0, -0.05, 0.95);
+                glColor3f(0, 0, 0);
+                glutSolidSphere(0.1, 10, 10);
+            glPopMatrix();
+            
+            
+            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb3); //putting material onto the head
+            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff3);
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec3);
+            glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny3*128);
+            
+            glPushMatrix();
+            //translate relative to body, and draw head
+                glTranslatef(0, 1.25, 0);
+                glRotatef(headRot[1], 0, 1, 0); //turn the head relative to the body
+                glColor3f(1,1,1);
+                glutSolidSphere(0.5, 16, 16);
+                
+                glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,  m_amb2); //putting material onto the eyes and nose
+                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,  m_diff2);
+                glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_spec2);
+                glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,  shiny2*128);
+                
+                //translate and draw right eye
+                glPushMatrix();
+                    glTranslatef(0.2, 0.15, 0.45);
+                    glColor3f(0,0,0);
+                    glutSolidSphere(0.1, 10, 10);
+                glPopMatrix();
+                
+                //translate and draw left eye
+                glPushMatrix();
+                    glTranslatef(-0.2, 0.15, 0.45);
+                    glColor3f(0,0,0);
+                    glutSolidSphere(0.1, 10, 10);
+                glPopMatrix();
+                
+                //translate and draw nose
+                glPushMatrix();
+                    glTranslatef(0, 0, 0.5);
+                    glColor3f(1,0.4,0);
+                    glutSolidSphere(0.1, 10, 10);
+                glPopMatrix();
+            
+            glPopMatrix();//body
+        glPopMatrix();//snowman
     
     glPopMatrix();
 }
 
 
 void updateeyeposition(){
-
 	if (spherical){
-
 		eye[0] = eyeradius * sin(eyephi) * cos(eyetheta);
 		eye[1] = eyeradius  * cos(eyephi);
 		eye[2] = eyeradius * sin(eyetheta) * sin(eyephi);
-	}
-
-	else{
-
+	} else {
 		eye[0] = eyex;
 		eye[1] = eyey;
 		eye[2] = eyez;
 	}
 
 }
+
 void sphericaltocartesion(){
 	eyex = eyeradius * sin(eyephi) * cos(eyetheta);
 	eyey = eyeradius  * cos(eyephi);
 	eyez = eyeradius * sin(eyetheta) * sin(eyephi);
-
 }
+
 void cartesiontospherical(){
 	eyeradius = sqrtf(eyex * eyex + eyey * eyey + eyez * eyez);
 	eyephi = acos(eyey/eyeradius);
@@ -497,9 +478,8 @@ void cartesiontospherical(){
 	if(eyez > 0){
 		eyetheta += 3.14;
 	}
-
 }
-int jassf;
+
 //aAAA
 // void updatelookatposition(){
     
@@ -508,32 +488,33 @@ int jassf;
 //     lookat[2] = lookatradius * sin(lookattheta) * sin(lookatphi);
 // }
 
-// BORNA UPDATE TO HERE
+//putting text onto the window
 void textprinter(int x, int y, char* text)
 {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    glLoadIdentity();
-    glOrtho(0, 800, 0, 800, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    //glDisable(GL_DEPTH_TEST);
-    glRasterPos2i(x,y);
+        glLoadIdentity();
+        glOrtho(0, 800, 0, 800, -1, 1);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glLoadIdentity();
+            //glDisable(GL_DEPTH_TEST);
+            glRasterPos2i(x,y);
 
-    glColor3f(0,0,1);
-    char* c;  //character iterator (ptr)
-    for(c = text; *c != '\0'; c++) //stop when we hit null character
-    {
-        glutStrokeCharacter(GLUT_STROKE_ROMAN, *c); //print one char
-    }
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
+            glColor3f(0,0,1);
+            char* c;  //character iterator (ptr)
+            for(c = text; *c != '\0'; c++) //stop when we hit null character
+            {
+                glutStrokeCharacter(GLUT_STROKE_ROMAN, *c); //print one char
+            }
+            glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 //    glEnable(GL_DEPTH_TEST);
     
 }
+//changing from string to char
 void changetostring(int integer){
     
     stringstream streamint;
@@ -546,41 +527,53 @@ void changetostring(int integer){
     
 }
 
+//drawing the basket for the ball to go into
 void drawBasket() {
     glColor3f(1,0,0);
     glPushMatrix();
-        glTranslatef(basketPos.x, basketPos.y, basketPos.z);
+        glTranslatef(basketPos.x, basketPos.y, basketPos.z); //moving the position of the basket 
         glPushMatrix();
-            glTranslatef(0, 0.8, -1);
+            glTranslatef(0, 0.8, 1);    //defining the position and size of the backboard
             glScalef(2.5, 2.5, 0.1);
             glutSolidCube(1);
         glPopMatrix();
-        glRotatef(90, 1, 0, 0);
-        glutSolidTorus(basketRadius / 5, basketRadius, 100, 100);
+        glRotatef(90, 1, 0, 0); //making the hoop horizontal
+        glutSolidTorus(basketRadius / 5, basketRadius, 100, 100);   //drawing the torus for the hoop
     glPopMatrix();
 }
 
+//global variables for the timer
 bool pendingStop = false;
 float groundstartTime;
 float currentTime;
 bool bounced = false;
 
+//timer function for when the ball resets after the shot is missed
 void startTimer(){
     groundstartTime=(GLfloat)glutGet(GLUT_ELAPSED_TIME);
 }
 
+//global variables
 vector<int> intersectionIndex;
 vec3D intersectedFaceNormal;
 point3D intersectedFacePosition;
 int oInd;
 int fInd;
 
-
-
+//reseting the ball back into the original position
 void resetBall() {
+    //putting the current position back to the start position values
     position = L->startingPosition;
-    velocity.x = 0.0f; velocity.y = 0.0f; velocity.z = 0.0f;
-    acceleration.x = windspeed; acceleration.y = -100.0f; acceleration.z = 0.0f;
+
+    velocity.x = 0.0f; //reseting velocity values to 0
+    velocity.y = 0.0f; 
+    velocity.z = 0.0f;
+
+    acceleration.x = windspeed; //reseting the acceleration values back to the original 
+    acceleration.y = -100.0f; 
+    acceleration.z = 0.0f;
+
+   //changing the bool values back to ball not being launched and not bouncing
     launched = false;
     pendingStop = false;
     bounced = false;
@@ -588,19 +581,14 @@ void resetBall() {
 
 int updateinterval = 120;
 
-
-
-
+//the motion of the ball function
 void ballMotion(int value){
-
 	//Ball resets after certain amount of time 
     if(bounced){
-
         if (pendingStop == false){
             pendingStop = true;
             startTimer();           //starts a 3 second timer
-        }
-        else{
+        } else {
             currentTime = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
            // printf("%f\n", currentTime-groundstartTime);
             if (currentTime - groundstartTime > 5000){
@@ -608,7 +596,7 @@ void ballMotion(int value){
             }
         }
     }
-    if (launched == true) {
+    if (launched == true) { //if the ball is launched
     	//Increment velocity based on acceleration
 	    velocity.x = velocity.x + acceleration.x/updateinterval;
 	    velocity.y = velocity.y + acceleration.y/updateinterval;
@@ -703,11 +691,8 @@ void ballMotion(int value){
             }
         }
         //Snowman intersection
-
     }
-
     glutTimerFunc(5,ballMotion,0);
-
 }
 
 float input1, input2, input3;
@@ -724,27 +709,27 @@ void keyboard(unsigned char key, int x, int y)
             
 		case 'W':
         case 'w':
-      		eyez +=0.1;
+      		eyez +=0.1; //changing the eye position in z+ direction
         	break;
 
         case 'a':
         case 'A':
-          	eyex +=0.1;
+          	eyex +=0.1; //changing the eye position in x+ direction
         	break;
 
     	case 'S':
         case 's':
-        	eyez -=0.1;
+        	eyez -=0.1; //changing the eye position in z- direction
         	break;
 
         case 'D':
         case 'd':
-          	eyex -=0.1;
+          	eyex -=0.1; //changing the eye position in x- direction
         	break;
 
         case 'U':
         case 'u':
-          	eyey +=0.1;
+          	eyey +=0.1; //changing the eye position in y+ direction
         	break;
 
         case 'I':
@@ -787,50 +772,50 @@ void keyboard(unsigned char key, int x, int y)
         case 'm':
         case 'M':
         	if (spherical){
-        	sphericaltocartesion();
-        	spherical = false;
+        	sphericaltocartesion();    //toggle for switching between spherical and cartesian
+        	spherical = false; //switching it to cartesian from spherical
 	        }
 
         	else{
-        	cartesiontospherical();
-        	spherical = true;
+        	cartesiontospherical();    //switching to spherical from cartesian
+        	spherical = true;  //now on spherical
         	}
         case 'r':
-            resetBall();
+            resetBall();    //reseting the ball back to original position
             break;
           
         case '1':
-            if (textureToggle == true){
-                glEnable(GL_TEXTURE_2D);
+            if (textureToggle == true){ //texture is on
+                glEnable(GL_TEXTURE_2D);    //enable texture
                 // glBindTexture(GL_TEXTURE_2D, textures[0]);
                 
-                textureToggle = false;
+                textureToggle = false;  //change it to false to be turned off
             } else {
-                glDisable(GL_TEXTURE_2D);
-                textureToggle = true;
+                glDisable(GL_TEXTURE_2D);   //disable texture
+                textureToggle = true;   //change toggle to be true to be turned back on
             }
             break;
             
         case '2':
-            text = 2;
+            text = 2;   //setting value to be 2, to be switched to first texture
             // glBindTexture(GL_TEXTURE_2D, textures[0]);
             break;
             
         case '3':
-            text = 3;
+            text = 3;   //setting value to be 3, to be switched to second texture
             // glBindTexture(GL_TEXTURE_2D, textures[1]);
             
             break;
             
         case '4':
-            text = 4;
+            text = 4;   //setting value to be 4, to be switched to third texture
             // glBindTexture(GL_TEXTURE_2D, textures[2]);
             
             break;
     
 
     }
-    glutPostRedisplay();
+    glutPostRedisplay();    //refresh
 }
 
 void special(int key, int x, int y)
@@ -838,20 +823,20 @@ void special(int key, int x, int y)
 
     switch(key)
     { case GLUT_KEY_UP:
-            eye[1] += 1;
-            lookat[1] += 1;
+            eye[1] += 1;    //increment the y eye position
+            lookat[1] += 1; //increment the y lookat position
         break;
         case GLUT_KEY_DOWN:
-            eye[1] -= 1;
-            lookat[1] -= 1;
+            eye[1] -= 1;    //decrement the y eye position
+            lookat[1] -= 1; //decrement the y lookat position 
         break;
         case GLUT_KEY_LEFT:
-            eye[0] -= 1;
-            lookat[0] -= 1;
+            eye[0] -= 1;    //decrement the x eye position
+            lookat[0] -= 1; //decrement the x lookat position
         break;
         case GLUT_KEY_RIGHT:
-            eye[0] += 1;
-            lookat[0] += 1;
+            eye[0] += 1;    //increment the x eye position
+            lookat[0] += 1; //increment the x lookat position
         break;
         
     }
@@ -862,10 +847,10 @@ void init(void)
 {   glClearColor(0, 0, 0, 0);
     glColor3f(1,0,0);
     
-    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHTING);  //enable lighting 
     //glEnable(GL_LIGHT0);
-    glEnable(GL_LIGHT1);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, amb0);
+    glEnable(GL_LIGHT1);    //enable light1
+    glLightfv(GL_LIGHT0, GL_AMBIENT, amb0); //setting the amb, diff, spec values for the light
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diff0);
     glLightfv(GL_LIGHT0, GL_SPECULAR, spec0);
 
@@ -885,43 +870,46 @@ void init(void)
     
 }
 
-
-
+//display function that is shown
 void display(void)
 {
     float origin[3] = {0,0,0};
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glMatrixMode(GL_MODELVIEW);
     updateeyeposition();
     glLoadIdentity();
-    changetostring(intscorecounter);
-    glDisable(GL_LIGHTING);
-    textprinter(750,780, (char*)counterstring);
-    glEnable(GL_LIGHTING);
-    gluLookAt(eye[0],eye[1],eye[2], lookat[0],lookat[1],lookat[2], 0, 1, 0);
-    glLightfv(GL_LIGHT0, GL_POSITION, light1_pos);
+    changetostring(intscorecounter);    //changing the score counter depending on the user's score
+
+    glDisable(GL_LIGHTING); //disable lighting
+    textprinter(750,780, (char*)counterstring); //displaying text
+    glEnable(GL_LIGHTING);  //enable lighting
+
+    gluLookAt(eye[0],eye[1],eye[2], lookat[0],lookat[1],lookat[2], 0, 1, 0);    //placement of lookat
+    glLightfv(GL_LIGHT0, GL_POSITION, light1_pos);  //placement of lights
     glLightfv(GL_LIGHT1, GL_POSITION, light2_pos);
     
-    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);   //disable texture
 
-    L->drawLevel();
-    DrawSnowman(pos, rot);
-    drawBasket();
-    glDisable(GL_TEXTURE_2D);
-    drawBasket();
-    DrawSnowman(pos, rot);
-    if(textureToggle == true){
-        glEnable(GL_TEXTURE_2D);
+    L->drawLevel(); //drawing the level
+    glDisable(GL_TEXTURE_2D);   //disable texture on the basket
+    drawBasket();   //draw basket
+    if (currentLevel==3) {
+        DrawSnowman(pos, rot);  //draw snowman
     }
-    ballTexture();
-    drawBall();
+    
+    if(textureToggle == true){  //turning on the texture with the toggle
+        glEnable(GL_TEXTURE_2D);    //enable texture for the ball
+    }
+    ballTexture();  //switching between material
+    drawBall(); //drawing ball
 
     glutSwapBuffers();
     glutPostRedisplay();
     
 }
 
-int calcInter(int x, int y) {
+int calcInter(int x, int y, float ballx, float bally, float ballz) {
     GLdouble R0[3], R1[3], Rd[3];
     GLdouble modelMat[16];
     GLdouble projMat[16];
@@ -942,24 +930,27 @@ int calcInter(int x, int y) {
     Rd[0] /= m;
     Rd[1] /= m;
     Rd[2] /= m;
+    
     double defOffset = 2.0; //the distance from the center of the ball to its outer bounding box.
 
 
         
-        double t = (((double)position.z) - R0[2])/Rd[2];
+        double t = (((double)ballz) - R0[2])/Rd[2];
         
         
         double pt[3];
         pt[0] = R0[0] + t * Rd[0];
         pt[1] = R0[1] + t * Rd[1];
-        pt[2] = position.z;
-        
-        if ( pt[0] > position.x - (defOffset)  //if point is within bounding box
-            && pt[0] < position.x + (defOffset)
-            && pt[1] > position.y - (defOffset)
-            && pt[1] < position.y + (defOffset)
-            && pt[2] > position.z - (defOffset)
-            && pt[2] < position.z + (defOffset)) {
+        pt[2] = ballz;
+    printf("ray: %f,%f,%f",pt[0],pt[1],pt[2]);
+    printf("ball: %f,%f,%f",position.x,position.y,position.z);
+    
+        if ( pt[0] > ballx - (defOffset)  //if point is within bounding box
+            && pt[0] < ballx + (defOffset)
+            && pt[1] > bally - (defOffset)
+            && pt[1] < bally + (defOffset)
+            && pt[2] > ballz - (defOffset)
+            && pt[2] < ballz + (defOffset)) {
             printf("true\n");
             return true;
         }
@@ -972,104 +963,15 @@ int calcInter(int x, int y) {
     
 }
 
-//bool calcIntersection(vec3D r0, vec3D rd) {
-//    //Max and min of bounding box for ball
-//    vec3D min, max;
-//    min.x = position.x - 0.5f; min.y = position.y - 0.5f; min.z = position.z - 0.5f;
-//    max.x = min.x + 1.0f; max.y = min.y + 1.0f; max.z = min.z + 1.0f;
-//    
-//    //Calculate points on the front face of the ball
-//    point3D p0, p1, p2, p3;
-//    p0.x = min.x; p0.y = min.y; p0.z = max.z;
-//    p1.x = max.x; p1.y = min.y; p1.z = max.z;
-//    p2.x = max.x; p2.y = max.y; p2.z = max.z;
-//    p3.x = min.x; p3.y = max.y; p3.z = max.z;
-//    
-//    //Calculate the equation of the plane intersecting with the face
-//    float a, b, c, d;
-//    vec3D t1, t2, norm;
-//    
-//    t1 = t1.createVector(p1, p0);
-//    t2 = t2.createVector(p2, p0);
-//    
-//    norm = t1.crossProduct(t2);
-//    
-//    norm = norm.normalize();
-//    
-//    d = -((norm.x * p0.x) + (norm.y * p0.y) + (norm.z * p0.z));
-//    a = norm.x; b = norm.y; c = norm.z;
-//    
-//    //Test for intersection of the ray and the plane
-//    float t, dot0, dotD;
-//    vec3D is;
-//    
-//    dot0 = (a * r0.x) + (b * r0.y) + (c * r0.z);
-//    dotD = (a * rd.x) + (b * rd.y) + (c * r0.z);
-//    
-//    if (dot0 == 0) return false;
-//    
-//    t = -((dot0 + d) / dotD);
-//    
-//    is = r0 + rd.vectorMultiply(t);
-//    
-//    if ((is.x > p0.x) && (is.x < p1.x) && (is.y > p0.y) && (is.y < p2.y)) {
-//        return true;
-//    } else {
-//        return false;
-//    }
-//    
-//    
-//    
-//}
-
-//bool rayCast(float x, float y) {
-//    GLint viewport[4];          //declaring arrays and variables
-//    GLdouble modelview[16];
-//    GLdouble projection[16];
-//    float winX;
-//    float winY;
-//    GLdouble pos1X, pos1Y, pos1Z;
-//    GLdouble pos2X, pos2Y, pos2Z;
-//    GLdouble dirX, dirY, dirZ;
-//    vec3D r0, rd;
-//    
-//    glGetIntegerv(GL_VIEWPORT, viewport);
-//    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-//    
-//    glGetDoublev(GL_PROJECTION_MATRIX, projection);
-//    
-//    //Flip the y coordinate to have the proper opengl screen coords
-//    winX = x;
-//    winY = (float)viewport[3] - y;
-//    
-//    //Unproject the coordinates from screen to world coordinates on the near clipping plane
-//    gluUnProject(winX, winY, 0.0, modelview, projection, viewport, &pos1X, &pos1Y, &pos1Z);
-//    
-//    //Unproject the coordinates from screen to world coordinates on the far clipping plane
-//    gluUnProject(winX, winY, 1.0, modelview, projection, viewport, &pos2X, &pos2Y, &pos2Z);
-//    
-//    //Calculate a normalized ray between the far and near clipping planes
-//    dirX = pos2X - pos1X;
-//    dirY = pos2Y - pos1Y;
-//    dirZ = pos2Z - pos1Z;
-//    
-//    r0.x = pos1X; r0.y = pos1Y; r0.z = pos1Z;
-//    rd.x = dirX; rd.y = dirY; rd.z = dirZ;
-//    
-//    rd = rd.normalize();
-//    
-//    if (calcIntersection(r0, rd)) {
-//        return true;
-//    } else {
-//        return false;
-//    }
-//}
-
-
+//replace mouse function
+bool resetting = false; //only true after user has left clicked a ball to reset
 void mouse(int btn, int state, int x, int y){
     if (pendingStop){
-        if (calcInter(x, y)){
+        float ballx = position.x; float bally  = position.y; float ballz = position.z;
+
+        if (calcInter(x, 800-y,ballx,bally,ballz)){
             pendingStop = false;
+            resetting = true;
             resetBall();
         }
         
@@ -1078,8 +980,9 @@ void mouse(int btn, int state, int x, int y){
         if (state == GLUT_DOWN){
             startingMousepos[0] = x, startingMousepos[1] = y;       //store the starting mouse position
             startTime=(GLfloat)glutGet(GLUT_ELAPSED_TIME);          //store the time when the user first clicks down
+            resetting = false;
         }
-        else if(state == GLUT_UP){
+        else if(state == GLUT_UP && !resetting){
             
             finalMousepos[0] = x;
             finalMousepos[1] = y;
@@ -1093,19 +996,19 @@ void mouse(int btn, int state, int x, int y){
             averageZVelocity = dy/timeElapsed;
 
             if (ball == normal) {
-            	velocity.x += averageXVelocity*15;
-            	velocity.y = 2* (averageXVelocity+averageZVelocity)/2 + 20 ;
-            	velocity.z -= averageZVelocity*15;
+                velocity.x += averageXVelocity*15;
+                velocity.y = 2* (averageXVelocity+averageZVelocity)/2 + 20 ;
+                velocity.z -= averageZVelocity*15;
             }
             else if (ball == bouncy) {
-            	 velocity.x += averageXVelocity*15;
-	             velocity.y = 35;
-	             velocity.z -= averageZVelocity*15;
+                 velocity.x += averageXVelocity*15;
+                 velocity.y = 35;
+                 velocity.z -= averageZVelocity*15;
             }
             else if (ball == rock) {
-            	velocity.x += averageXVelocity*15;
-            	velocity.y = 25;
-            	velocity.z -= averageZVelocity*15;
+                velocity.x += averageXVelocity*15;
+                velocity.y = 25;
+                velocity.z -= averageZVelocity*15;
             }
 
             
@@ -1114,8 +1017,8 @@ void mouse(int btn, int state, int x, int y){
             bounced = false;
         }
     }
-    
 }
+    
 void callbackinit(){
     glutTimerFunc(0, ballMotion, 0);
 }
@@ -1128,12 +1031,10 @@ int main(int argc, char** argv)
     
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     
-    
     glutInitWindowSize(800, 800);
     glutInitWindowPosition(100, 100);
 
-    firstwindow = glutCreateWindow("BallToss");  //creates the window
-    
+    firstwindow = glutCreateWindow("BallToss");  //creates the window    
     
     glutDisplayFunc(display);   //registers "display" as the display callback function
     glutKeyboardFunc(keyboard);

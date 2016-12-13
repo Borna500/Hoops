@@ -533,7 +533,7 @@ void drawBasket() {
     glPushMatrix();
         glTranslatef(basketPos.x, basketPos.y, basketPos.z); //moving the position of the basket 
         glPushMatrix();
-            glTranslatef(0, 0.8, 1);    //defining the position and size of the backboard
+            glTranslatef(0, 0.8, -1);    //defining the position and size of the backboard
             glScalef(2.5, 2.5, 0.1);
             glutSolidCube(1);
         glPopMatrix();
@@ -619,7 +619,7 @@ void ballMotion(int value){
 	    		fInd = intersectionIndex.at(1);
 	    		intersectedFaceNormal = L->levelObjects->at(oInd)->objectFaces->at(fInd)->normal;
 	    		intersectedFacePosition = L->levelObjects->at(oInd)->objectFaces->at(fInd)->min;
-                printf("%i, %i\n", oInd, fInd);
+                //printf("%i, %i\n", oInd, fInd);
 	    	}
 	    }
 
@@ -709,22 +709,22 @@ void keyboard(unsigned char key, int x, int y)
             
 		case 'W':
         case 'w':
-      		eyez +=0.1; //changing the eye position in z+ direction
+      		eyez -=0.1; //changing the eye position in z+ direction
         	break;
 
         case 'a':
         case 'A':
-          	eyex +=0.1; //changing the eye position in x+ direction
+          	eyex -=0.1; //changing the eye position in x+ direction
         	break;
 
     	case 'S':
         case 's':
-        	eyez -=0.1; //changing the eye position in z- direction
+        	eyez +=0.1; //changing the eye position in z- direction
         	break;
 
         case 'D':
         case 'd':
-          	eyex -=0.1; //changing the eye position in x- direction
+          	eyex +=0.1; //changing the eye position in x- direction
         	break;
 
         case 'U':
@@ -866,7 +866,15 @@ void init(void)
     //Load the level
     L = new Level(1);
     currentLevel = 1;
-    printf("The camera controls in the cartesion co-ordinate system are WASD to move the camera forward, left, back, and right respectively and U and I to move the camera up and down.The camera controls in the spherical co-ordinate system are z and Z to increase and decrease the distance from the centre of the room respectively, x and X increase and decrease the azimuthal angle respectively, and c and C increase and decrease the polar angle respectively.The default camera mode is in the cartesion co-ordinate system and M alternates between the cartesion co-ordinate system and the spherical co-ordinate system.");
+    printf("m switches between spherical and cartesian camera, initially cartesian");
+    printf("Cartesian camera controls W A S D to move the camera forward, left, back, and right\n");
+    printf("U and I move the camera up and down\n");
+    printf("z and Z increase and decrease the distance from the centre of the room\n");
+    printf("x and X increase and decrease the azimuthal angle respectively\n");
+    printf("c and C increase and decrease the polar angle respectively\n");
+    printf("1 toggles textures on and off\n");
+    printf("r resets the ball's positon\n");
+
     
 }
 
@@ -942,8 +950,8 @@ int calcInter(int x, int y, float ballx, float bally, float ballz) {
         pt[0] = R0[0] + t * Rd[0];
         pt[1] = R0[1] + t * Rd[1];
         pt[2] = ballz;
-    printf("ray: %f,%f,%f",pt[0],pt[1],pt[2]);
-    printf("ball: %f,%f,%f",position.x,position.y,position.z);
+  //  printf("ray: %f,%f,%f",pt[0],pt[1],pt[2]);
+    //printf("ball: %f,%f,%f",position.x,position.y,position.z);
     
         if ( pt[0] > ballx - (defOffset)  //if point is within bounding box
             && pt[0] < ballx + (defOffset)
@@ -951,11 +959,11 @@ int calcInter(int x, int y, float ballx, float bally, float ballz) {
             && pt[1] < bally + (defOffset)
             && pt[2] > ballz - (defOffset)
             && pt[2] < ballz + (defOffset)) {
-            printf("true\n");
+         //   printf("true\n");
             return true;
         }
         else{
-            printf("false\n");
+         //   printf("false\n");
             return false;
         }
         
@@ -1012,7 +1020,7 @@ void mouse(int btn, int state, int x, int y){
             }
 
             
-            printf("%f,%f\n", averageXVelocity,averageZVelocity);
+       //     printf("%f,%f\n", averageXVelocity,averageZVelocity);
             launched = true;
             bounced = false;
         }

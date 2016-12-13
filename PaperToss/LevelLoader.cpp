@@ -37,7 +37,7 @@ Face::Face(){}
 
 Face::Face(point3D min, point3D max, int normalflip, int material) {
 
-	printf("ok so %f %f %f %f %f %f\n", min.x, min.y, min.z, max.x, max.y, max.z);
+	//printf("ok so %f %f %f %f %f %f\n", min.x, min.y, min.z, max.x, max.y, max.z);
 	materialIndex = material;
 
 	if (min.x == max.x) {
@@ -84,7 +84,7 @@ void Face::calcNormal(int normalflip) {
 
 	normal = norm.normalize();
 
-	printf("%f, %f, %f\n", normal.x, normal.y, normal.z);
+	//printf("%f, %f, %f\n", normal.x, normal.y, normal.z);
 };
 
 
@@ -212,7 +212,7 @@ Level::Level(int l) {
 	levelObjects = new vector<Object*>();
 
 	switch(lvl) {
-		case 3:
+		case 1:
 
 			ballRadius = 0.5; 
 			ballBounciness = 0.5;
@@ -250,7 +250,7 @@ Level::Level(int l) {
 
 		break;
 
-		case 1:
+		case 3:
 			ballRadius = 1; 
 			ballBounciness = 0.9;
 			ball = bouncy;
@@ -369,17 +369,17 @@ Level::Level(int l) {
 
 		break;
 	}
-		printf("Left wall\n");
+		//printf("Left wall\n");
 		Object* leftWall = new Object(plane, lBoundMin, lBoundMax, 1, wallmat);
-		printf("Right wall\n");
+		//printf("Right wall\n");
 		Object* rightWall = new Object(plane, rBoundMin, rBoundMax, -1, wallmat);
-		printf("Back wall\n");
+		//printf("Back wall\n");
 		Object* backWall = new Object(plane, bBoundMin, bBoundMax, 1, wallmat);
 
 		Object* frontWall = new Object(plane, dBoundMin, dBoundMax, -1, wallmat);
-		printf("Floor\n");
+	//	printf("Floor\n");
 		Object* floor = new Object(plane, fBoundMin, fBoundMax, 1, wallmat);
-		printf("Ceiling\n");
+	//	printf("Ceiling\n");
 		Object* ceiling = new Object(plane, cBoundMin, cBoundMax, -1, wallmat);
 
 		levelObjects->push_back(leftWall);
@@ -530,7 +530,6 @@ bool Face::testIntersection(float x, float y, float z, float ballRad) {
 	else if (normal.z == 1) {
 		if (z - ballRad < min.z && z + ballRad > min.z){
 			if (x >= min.x && x <= max.x && y >= min.y && y <= max.y) {
-				printf("Intersected with %f %f\n", min.z, z);
 				return true;
 			}
 		}
